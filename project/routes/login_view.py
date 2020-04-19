@@ -48,7 +48,7 @@ def protected():
 
 @login_bp.route('/register')
 def register():
-    print('in register')
+    print('in register!!!!!')
 
 
 @login_bp.route('/logout')
