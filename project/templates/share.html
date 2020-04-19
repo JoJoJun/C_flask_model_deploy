@@ -4,6 +4,9 @@
 
 {% block content %}
 <style>
+	.splash-container{
+		height: 100%;
+	}
 	.regist-info{
 		width: 80%;
 		display: inline-block;
@@ -27,7 +30,7 @@
 			<br>================<br>
 			<div class="regist-body" style="margin-top: 3%">
 				注册成功！
-				<a href="/login/">点击登陆</a>
+				<a href="/account/login/">点击登陆</a>
 				<p style='margin-top: 2%'>
 					<span id='count'>3</span>秒后自动跳转至登陆界面
 				</p>
@@ -39,13 +42,13 @@
 	onload = function(){ 
 		setInterval(go, 1000);
 	}; 
-	var x = 3;
+	let x = 3;
 	function go(){ 
 		x --;
 		if(x>0){
 			document.getElementById("count").innerHTML = x;
 		}else{
-			location.href="../login/";
+			location.href="/account/login/";
 		}
 	} 
 </script>

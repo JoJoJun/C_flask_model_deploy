@@ -2,6 +2,9 @@
 
 {% block import %}
 <style>
+    .content-inner {
+        display: flex;
+    }
     label.required:before {
         content: '* ';
         color: red;
@@ -45,6 +48,13 @@
         <button type="button" class="btn btn-default cancel">取消</button>
     </div>
 </form>
+<!-- 转圈动画 -->
+<div id="loading" class="submit_loading" style="display:none">
+    <div class="loading_show">
+        <img src="/static/image/loading.gif">
+        <p class="loading_context">正在创建项目，请稍候。。。</p>
+    </div>
+</div>
 <script>
     let nav_list = ['首页', '项目', '创建项目'];
     $(function () {
@@ -78,27 +88,28 @@
             $('.create').attr('disabled', false);
     });
     $('.cancel').click(function () {
-        window.location = '/index/';
+        window.location = '/project/';
     });
     $('.create').click(function () {
         let pName = document.getElementById('project-name').value;
         let pRoute = document.getElementById('project-route').value;
         let pDesc = document.getElementById('project-description').value;
-        let upload_data = {'pName': pName, 'pRoute': pRoute, 'pDesc': pDesc};
+        let upload_data = {'name': pName, 'url': pRoute, 'description': pDesc};
         $.ajax({
             type: "POST",
             data: upload_data,
             dataType: 'json',
             beforeSend:function () {
-                // $('#loading').show();
+                $('#loading').show();
             },
             success:function(data){
-                // $('#loading').hide();
-                console.log(data)
-                if(data['code'] == 1000)
-                    alert('创建成功');
-                else
+                $('#loading').hide();
+                console.log(data);
+                if(data['code'] == '1000')
+                    window.location = '/project/view/'+data['msg'];
+                else {
                     alert('创建失败');
+                }
             }
         });
     });

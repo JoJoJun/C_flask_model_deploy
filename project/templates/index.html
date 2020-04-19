@@ -30,7 +30,7 @@
     <span class="badge">{{ data|length }}</span>
 </div>
 <div id="toolbar">
-    <a href="create_project"><button class="btn btn-default" id="create_project">
+    <a href="/project/addPro"><button class="btn btn-default" id="create_project">
         <i class="fa fa-plus-circle" aria-hidden="true"></i>
         &nbsp;新建项目
     </button></a>
@@ -102,13 +102,13 @@
     </div>
 </div>
 <script>
-    let project_data = {{ data|safe }};
+    let projects_data = {{ data|safe }};
     let nav_list = ['首页', '项目'];
     let current_delete_btn;
     let current_project_id;
     $(function () {
         load_nav(nav_list);
-        table_switch(project_data);
+        load_table(projects_data);
     });
     $("#project-name, #project-route").blur(function(){
         // 先清空所有的span元素
@@ -142,8 +142,9 @@
         let pName = document.getElementById('project-name').value;
         let pRoute = document.getElementById('project-route').value;
         let pDesc = document.getElementById('project-description').value;
-        let upload_data = {'pId': pId, 'pName': pName, 'pRoute': pRoute, 'pDesc': pDesc};
+        let upload_data = {'id': pId, 'name': pName, 'url': pRoute, 'description': pDesc};
         $.ajax({
+            url: "/project/editPro",
             type: "POST",
             data: upload_data,
             dataType: 'json',
@@ -153,7 +154,7 @@
             success:function(data){
                 // $('#loading').hide();
                 console.log(data);
-                if(data['code'] == 1000)
+                if(data['code'] == '3000')
                     alert('保存修改成功');
                 else
                     alert('保存修改失败');
@@ -162,25 +163,27 @@
     });
     $('#delete-yes').click(function () {
         $.ajax({
+            url: "/project/deletePro",
             type: "POST",
             data: {'project_id': current_project_id},
             dataType: 'json',
             success:function(data){
+                console.log(data);
                 let obj = current_delete_btn.closest('tr');
                 obj.animate({opacity:0.0}, 800, 'swing', function(){
                     $('#project-list').bootstrapTable('remove', {field: 'operation', values: current_project_id});
                 });
-                for(let i = 0; i < project_data.length; i++){
-                    if(project_data[i]['id'] == current_project_id){
-                        project_data.splice(i, 1);
+                for(let i = 0; i < projects_data.length; i++){
+                    if(projects_data[i]['id'] == current_project_id){
+                        projects_data.splice(i, 1);
                         break;
                     }
                 }
-                $('span[class="badge"]').html(project_data.length);
+                $('span[class="badge"]').html(projects_data.length);
             }
         });
-    })
-    function table_switch(data){
+    });
+    function load_table(data){
         let tableData = new Array();
         for(let i = 0; i < data.length; i++){
             tableData[i] = new Object();
@@ -197,7 +200,7 @@
             {field: 'update_time', title: '更新时间', sortable: true},
             {field: 'operation', title: '操作',
                 formatter: function(value,row,index){
-                    let viewBtn   = '<a href=\"project/'+value+'\"><button type="button" class="btn btn-success">查看</button></a>';
+                    let viewBtn   = '<button id=\"view-'+value+'\" type="button" class="btn btn-success view">查看</button>';
                     let editBtn   = '<button id=\"edit-'+value+'\" type="button" class="btn btn-info" data-toggle="modal" data-target="#edit-modal">修改</button>';
                     let deleteBtn = '<button id=\"del-'+value+'\" type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-confirm-modal">删除</button>';
                     return viewBtn +'&nbsp;'+ editBtn +'&nbsp;'+ deleteBtn;
@@ -233,8 +236,12 @@
         // 刷新表格
         $(document).on('click', 'button[name="refresh"]', function () {
             $("#project-list").bootstrapTable('refresh', {
-                url: '/index/'
+                url: '/project/'
             });
+        });
+        // 查看按钮
+        $(document).on('click', 'button.view', function () {
+            window.location = "view/"+this.id.split('-')[1];
         });
         // 修改按钮
         $(document).on('click', 'button[data-target="#edit-modal"]', function () {
@@ -248,6 +255,8 @@
                     document.getElementById('project-name').value = data['pName'];
                     document.getElementById('project-route').value = data['pRoute'];
                     document.getElementById('project-description').value = data['pDesc'];
+                    $('.modal .has-error span').remove();
+                    $('.modal .has-error.has-feedback').removeClass('has-error has-feedback');
                 }
             });
         });
@@ -256,9 +265,9 @@
             current_delete_btn = $(this);
             current_project_id = this.id.split('-')[1];
             let pName = '';
-            for(let i = 0; i < project_data.length; i++){
-                if(project_data[i]['id'] == current_project_id)
-                    pName = project_data[i]['name'];
+            for(let i = 0; i < projects_data.length; i++){
+                if(projects_data[i]['id'] == current_project_id)
+                    pName = projects_data[i]['name'];
             }
             document.getElementById('pName').innerText = pName;
         })
