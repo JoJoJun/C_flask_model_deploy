@@ -6,6 +6,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+
 engine = create_engine('mysql+pymysql://DaaS:flask2020@39.97.219.243/daas', convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,autoflush=False,bind=engine))
 Base = declarative_base()
@@ -93,10 +95,13 @@ class User(Base):
     update_time = Column(DateTime)
     state = Column(Integer)
 
-    def __init__(self, account,password,name):
+    def __init__(self, account,password,name,create_time,update_time):
         self.account = account
-        self.password = password
+        self.password = generate_password_hash(password)
         self.name = name
+        self.create_time = create_time
+        self.update_time = update_time
+        self.state = 0
 
     def is_authenticated(self):
         return True
@@ -110,8 +115,8 @@ class User(Base):
     def get_id(self):
         return self.account
 
-    def get_password(self):
-        return self.password
+    def check_password(self,password):
+        return check_password_hash(self.password, password)
 
     def __repr__(self):
         return '<User %r>' % (self.name)
