@@ -144,7 +144,7 @@
         let pDesc = document.getElementById('project-description').value;
         let upload_data = {'id': pId, 'name': pName, 'url': pRoute, 'description': pDesc};
         $.ajax({
-            url: "/project/editPro",
+            url: "/project/editPro/",
             type: "POST",
             data: upload_data,
             dataType: 'json',
@@ -154,7 +154,7 @@
             success:function(data){
                 // $('#loading').hide();
                 console.log(data);
-                if(data['code'] == '3000')
+                if(data['code'] == 3000)
                     alert('保存修改成功');
                 else
                     alert('保存修改失败');
@@ -163,9 +163,9 @@
     });
     $('#delete-yes').click(function () {
         $.ajax({
-            url: "/project/deletePro",
+            url: "/project/deletePro/",
             type: "POST",
-            data: {'project_id': current_project_id},
+            data: {'id': current_project_id},
             dataType: 'json',
             success:function(data){
                 console.log(data);
@@ -188,15 +188,15 @@
         for(let i = 0; i < data.length; i++){
             tableData[i] = new Object();
             tableData[i].name = data[i].name;
-            tableData[i].model = data[i].model;
-            tableData[i].deploy = data[i].deploy;
+            tableData[i].url = data[i].url;
+            tableData[i].create_time = data[i].create_time;
             tableData[i].update_time = data[i].update_time;
             tableData[i].operation = data[i].id;
         }
         let tableColumns = [
             {field: 'name', title: '名称', sortable: true},
-            {field: 'model', title: '模型', sortable: true},
-            {field: 'deploy', title: '部署', sortable: true},
+            {field: 'url', title: '路由', sortable: true},
+            {field: 'create_time', title: '创建时间', sortable: true},
             {field: 'update_time', title: '更新时间', sortable: true},
             {field: 'operation', title: '操作',
                 formatter: function(value,row,index){
@@ -241,7 +241,7 @@
         });
         // 查看按钮
         $(document).on('click', 'button.view', function () {
-            window.location = "view/"+this.id.split('-')[1];
+            window.location = "/project/view/"+this.id.split('-')[1];
         });
         // 修改按钮
         $(document).on('click', 'button[data-target="#edit-modal"]', function () {

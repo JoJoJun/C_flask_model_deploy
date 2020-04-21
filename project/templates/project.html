@@ -13,32 +13,152 @@
     .search-input {
         border-radius: 4px!important;
     }
+
+    .page-header {
+        margin-top: 0;
+    }
+    .project-basic-info div {
+        padding-top: 0px;
+    }
+    .project-basic-info h3 {
+        margin-top: 0px;
+        font-size: 20px;
+    }
+    .project-basic-info p {
+        margin-left: 10px;
+    }
 </style>
 {% endblock %}
 
 {% block content_head %} 查看项目 {% endblock %}
 {% block content_inner %}
-<div>
-    <h1>sss</h1>
+<h3 class="page-header">基本信息</h3>
+<div class="pure-g project-basic-info">
+    <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-5">
+        <h3 class="content-subhead">
+            <i class="fa fa-podcast"></i>
+            名称
+        </h3>
+        <p id="name"></p>
+    </div>
+    <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-5">
+        <h3 class="content-subhead">
+            <i class="fa fa-compass"></i>
+            路由
+        </h3>
+        <p id="url"></p>
+    </div>
+    <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-5">
+        <h3 class="content-subhead">
+            <i class="fa fa-rocket"></i>
+            模型数量
+        </h3>
+        <p id="model_count"></p>
+    </div>
+    <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-5">
+        <h3 class="content-subhead">
+            <i class="fa fa-calendar-plus-o"></i>
+            创建时间
+        </h3>
+        <p id="create_time"></p>
+    </div>
+    <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-5">
+        <h3 class="content-subhead">
+            <i class="fa fa-calendar-check-o"></i>
+            更新时间
+        </h3>
+        <p id="update_time"></p>
+    </div>
+    <div class="l-box pure-u-1 pure-u-md-1-1 pure-u-lg-1-1">
+        <h3 class="content-subhead">
+            <i class="fa fa-tags"></i>
+            描述
+        </h3>
+        <p id="description">Phasellus eget</p>
+    </div>
 </div>
+
+<h3 class="page-header">模型</h3>
 <div style="font-weight: bolder;margin-bottom: -40px">
     <span>模型</span>
     <span class="badge">{{ project_info.model_list | length }}</span>
 </div>
 <div id="toolbar">
-    <a href="#"><button class="btn btn-default" id="create_model">
+    <a href="/model/addModel"><button class="btn btn-default" id="create_model">
         <i class="fa fa-plus-circle" aria-hidden="true"></i>
-        &nbsp;新建模型
+        &nbsp;导入模型
     </button></a>
 </div>
 <table id="model-list" class="table table-striped table-bordered table-hover" style="display: table;"></table>
+<!-- 模态框 删除 -->
+<div class="modal fade" id="delete-confirm-modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">
+                    请确认
+                </h4>
+            </div>
+            <div class="modal-body">
+                您确定删除<span id="mName" style="font-weight: bold"></span>吗？
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="delete-yes">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     let project_data = {{ project_info | safe }};
     let nav_list = ['首页', '项目', '查看项目'];
+    let current_delete_btn;
+    let current_model_id;
     $(function () {
         load_nav(nav_list);
+        load_basic_info(project_data);
         load_table(project_data['model_list']);
     });
+    $('#delete-yes').click(function () {
+        $.ajax({
+            url: "/model/deleteModel/",
+            type: "POST",
+            data: {'model_id': current_model_id},
+            dataType: 'json',
+            success:function(data){
+                console.log(data);
+                let obj = current_delete_btn.closest('tr');
+                obj.animate({opacity:0.0}, 800, 'swing', function(){
+                    $('#model-list').bootstrapTable('remove', {field: 'operation', values: current_model_id});
+                });
+                for(let i = 0; i < project_data['model_list'].length; i++){
+                    if(project_data['model_list'][i]['id'] == current_model_id){
+                        project_data['model_list'].splice(i, 1);
+                        break;
+                    }
+                }
+                $('span[class="badge"]').html(project_data['model_list'].length);
+            }
+        });
+    });
+    function  load_basic_info(data) {
+        let keys = ['name', 'url', 'create_time', 'update_time', 'model_count', 'description'];
+        for(let key of keys){
+            let text = "";
+            switch (key) {
+                case 'model_count':
+                    let count = data['model_list'].length;
+                    text = count==0 ? "暂无模型" : count.toString()+'个模型';
+                    break;
+                case 'description':
+                    text = data[key]=='' ? '暂无描述' : data[key];
+                    break;
+                default : text = data[key];
+            }
+            $('#'+key).text(text);
+        }
+    }
     function load_table(data) {
         let tableData = new Array();
         for(let i = 0; i < data.length; i++){
@@ -58,9 +178,9 @@
             {field: 'description', title: '描述', sortable: true},
             {field: 'operation', title: '操作',
                 formatter: function(value,row,index){
-                    let viewBtn   = '<button type="button" class="btn btn-success view">查看</button>';
-                    let editBtn   = '<button type="button" class="btn btn-info" data-toggle="modal" data-target="#edit-modal">修改</button>';
-                    let deleteBtn = '<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-confirm-modal">删除</button>';
+                    let viewBtn   = '<button id=\"view-'+value+'\" type="button" class="btn btn-success view">查看</button>';
+                    let editBtn   = '<button id=\"edit-'+value+'\" type="button" class="btn btn-info" data-toggle="modal" data-target="#edit-modal">设置参数</button>';
+                    let deleteBtn = '<button id=\"del-'+value+'\" type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-confirm-modal">删除</button>';
                     return viewBtn +'&nbsp;'+ editBtn +'&nbsp;'+ deleteBtn;
                 }
             }
@@ -89,6 +209,25 @@
             toolbar:'#toolbar',//工具栏
             buttonsAlign: "right",
         });
+        // 查看按钮
+        $(document).on('click', 'button.view', function () {
+            window.location = "/model/view/"+this.id.split('-')[1];
+        });
+        // 设置参数按钮
+        $(document).on('click', 'button[data-target="#edit-modal"]', function () {
+
+        });
+        // 删除按钮
+        $(document).on('click', 'button[data-target="#delete-confirm-modal"]', function () {
+            current_delete_btn = $(this);
+            current_model_id = this.id.split('-')[1];
+            let mName = '';
+            for(let i = 0; i < project_data['model_list'].length; i++){
+                if(project_data['model_list'][i]['id'] == current_model_id)
+                    mName = project_data['model_list'][i]['name'];
+            }
+            document.getElementById('mName').innerText = mName;
+        })
     }
 </script>
 {% endblock %}
