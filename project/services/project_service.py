@@ -13,6 +13,7 @@ def list_all_project():
         d['route'] = l.route
         d['create_time'] = str(l.create_time)
         d['update_time'] = str(l.update_time)
+        d['id'] = l.id
         data.append(d)
     print(data)
     return data
