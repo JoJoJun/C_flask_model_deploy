@@ -99,7 +99,6 @@ def register():
         return redirect(url_for('login.login'))
         # print(res)
         # return render_template('login.html',user = user,res = res)
-    print(res)
     return render_template('regist.html',user=user,res=res)
 
 
