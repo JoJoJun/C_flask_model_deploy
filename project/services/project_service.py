@@ -14,3 +14,8 @@ def list_all_project():
         data.append(d)
     print(data)
     return data
+
+
+# user name的project是否已存在
+def check_project_same_name(name,user_account):
+    return Project.query.filter_by(name=name, user=user_account).first()

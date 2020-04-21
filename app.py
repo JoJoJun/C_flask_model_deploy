@@ -1,6 +1,5 @@
-import project
-# from flask import Flask, redirect, url_for,render_template,request
-# import flask_login
+import project,flask_login
+from flask import Flask,render_template,redirect,request,Blueprint
 # from models.models import User
 # # Flask构造函数使用当前模块（__name __）的名称作为参数。
 # app = Flask(__name__)
@@ -93,9 +92,13 @@ import project
 #       return redirect(url_for('hello_guest',guest = name))
 #
 #
+
+
 if __name__ == '__main__':
     # app.run(host, port, debug, options)
     # host要监听的主 机名。 默认为127.0.0.1（localhost）
     # debug 默认为false。 如果设置为true，则提供调试信息   options 要转发到底层的Werkzeug服务器
     app = project.create_app()
-    app.run(debug=True)
+    app.run(debug = True)
+
+#    app.run(host='0.0.0.0')
