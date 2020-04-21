@@ -11,7 +11,7 @@ def hello_name(name):
    return 'Hello %s!' % name
 
 
-@project_bp.route('/view/', methods=['GET', 'POST'])
+@project_bp.route('/', methods=['GET', 'POST'])
 def project_view():
    list = list_all_project()
    return render_template('index.html', user=flask_login.current_user, data=list)
