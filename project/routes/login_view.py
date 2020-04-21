@@ -1,6 +1,8 @@
 import flask_login
 from project.models.model import User
 from flask import Flask, redirect, url_for,render_template,request,Blueprint
+from project.services.project_service import list_all_project
+from project.models import db
 ## 登录的路由和逻辑都在这页了
 login_bp = Blueprint('login', __name__, url_prefix='/account')
 login_manager = flask_login.LoginManager()
@@ -25,17 +27,18 @@ def load_user(account):
 #     return user
 
 
-@login_bp.route('/login', methods=['GET', 'POST'])
+@login_bp.route('/login/', methods=['GET', 'POST'])
 def login():
     print("in login!!!!!")
     if request.method == 'GET':
         return render_template('login.html',user=flask_login.current_user)
-    email = request.form['username']
+    email = request.form['account']
     user_in_db = User.query.filter_by(account=email).first()
 
     if user_in_db and  request.form['password'] == user_in_db.get_password():
         flask_login.login_user(user_in_db)
-        return render_template('index.html',user = flask_login.current_user)
+        list = list_all_project()
+        return render_template('index.html',user = flask_login.current_user,data=list)
         # return redirect(url_for('login.protected'))
     return render_template('home.html',user=None)
 
@@ -46,12 +49,35 @@ def protected():
     print(flask_login.current_user)
     return 'Logged in as: ' + flask_login.current_user.account
 
-@login_bp.route('/register')
+
+@login_bp.route('/regist/', methods=['GET', 'POST'])
 def register():
-    print('in register!!!!!')
+    if request.method == 'GET':
+        user = {'is_authenticated': False, 'username': ''}
+        return render_template('regist.html',user=user)
+    account = request.form['account']
+    password = request.form['password']
+    password2 = request.form['password2']
+    name = request.form['name']
+    if password == password2:
+        code = 2003
+        msg = '确认密码错误，请重新输入'
+    user = User.query.filter_by(account=account).first()
+    if user:
+        msg = '账户已注册'
+        code = 2002
+    else:
+        new_user = User(account=account,password=password,name=name)
+        db.session.add(new_user)
+        db.session.commit()
+        msg='成功'
+        code = 1000
+        return redirect(url_for('login.login'))
+    return redirect(url_for('login.regist'))
 
 
-@login_bp.route('/logout')
+
+@login_bp.route('/logout/')
 def logout():
     flask_login.logout_user()
     return 'Logged out'

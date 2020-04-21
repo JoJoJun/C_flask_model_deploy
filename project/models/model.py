@@ -5,12 +5,13 @@ from sqlalchemy.schema import FetchedValue
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-
+from flask_sqlalchemy import SQLAlchemy
 engine = create_engine('mysql+pymysql://DaaS:flask2020@39.97.219.243/daas', convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,autoflush=False,bind=engine))
 Base = declarative_base()
 metadata = Base.metadata
 Base.query = db_session.query_property()
+db = SQLAlchemy()
 
 
 class File(Base):
@@ -92,8 +93,10 @@ class User(Base):
     update_time = Column(DateTime)
     state = Column(Integer)
 
-    def __init__(self, email):
-        self.email = email
+    def __init__(self, account,password,name):
+        self.account = account
+        self.password = password
+        self.name = name
 
     def is_authenticated(self):
         return True

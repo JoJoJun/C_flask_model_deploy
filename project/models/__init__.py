@@ -1,7 +1,13 @@
-from flask_sqlalchemy import SQLAlchemy
-db = SQLAlchemy()
+from .model import db
+
+
 def init_app(app):
     db.init_app(app)
+    print('db init!')
+# from flask_sqlalchemy import SQLAlchemy
+# db = SQLAlchemy()
+# def init_app(app):
+#     db.init_app(app)
 #
 # # project/routes/__init__.py
 # # from .users import user_bp
