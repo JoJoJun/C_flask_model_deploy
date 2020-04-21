@@ -6,17 +6,16 @@ import flask_login
 import datetime
 from project.models import db
 project_bp = Blueprint('project', __name__, url_prefix='/project')
-@project_bp.route('/hello/<name>')
-def hello_name(name):
-   return 'Hello %s!' % name
 
 
+# 登录后的全部项目列表页
 @project_bp.route('/', methods=['GET', 'POST'])
 def project_view():
    list = list_all_project()
    return render_template('index.html', user=flask_login.current_user, data=list)
 
 
+# 新建项目
 @project_bp.route('/addPro/', methods=['GET', 'POST'])
 def addPro():
    if request.method == 'GET':
@@ -40,6 +39,8 @@ def addPro():
       db.session.commit()
       code = 1000
       msg='新建项目成功'
+      res['code']=code
+      res['msg']=msg
       # return redirect(url_for('project.project_view'))
       return jsonify(res)
    # res['code']=code
