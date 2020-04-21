@@ -13,6 +13,7 @@ def list_all_project():
         d['route'] = l.route
         d['create_time'] = str(l.create_time)
         d['update_time'] = str(l.update_time)
+        d['id'] = l.id
         data.append(d)
     print(data)
     return data
@@ -23,6 +24,7 @@ def check_project_same_name(name,user_account):
     return Project.query.filter_by(name=name, user=user_account).first()
 
 def goDeletePro(pid):
+    # Project.query.filter_by和session不能同时使用
     pro = db.session.query(Project).filter_by(id=pid).first()
     db.session.delete(pro)
     db.session.commit()
