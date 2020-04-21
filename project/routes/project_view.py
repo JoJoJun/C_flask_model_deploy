@@ -54,12 +54,13 @@ def addPro():
 def editPro():
    if request.method == 'GET':
       return render_template('create_project.html',user = flask_login.current_user)
-   id = request.form['project_id']
-   name = request.form['Name']
+   id = request.form['id']
+   name = request.form['name']
    url = request.form['url']
    des = request.form['description']
    res = {}
-   user_account = flask_login.current_user.account
+#   user_account = flask_login.current_user.account
+   user_account = '123@123.com'
    if check_project_same_name(name, user_account):
        code = 2004
        msg = '用户名下已存在同名项目'
@@ -67,7 +68,8 @@ def editPro():
        res['msg'] = msg
        return render_template('index.html', user=flask_login.current_user, res=res)
    else:
-       pro = Project.query.filter_by(id=id).first()
+       pro = db.session.query(Project).filter_by(id=id).first()
+
        pro.name = name
        pro.url = url
        pro.description = des
