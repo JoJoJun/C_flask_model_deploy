@@ -3,6 +3,8 @@ from .model import db
 
 def init_app(app):
     db.init_app(app)
+    with app.app_context():
+        db.create_all()
     print('db init!')
 # from flask_sqlalchemy import SQLAlchemy
 # db = SQLAlchemy()
