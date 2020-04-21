@@ -23,6 +23,7 @@ def check_project_same_name(name,user_account):
     return Project.query.filter_by(name=name, user=user_account).first()
 
 def goDeletePro(pid):
+    # Project.query.filter_by和session不能同时使用
     pro = db.session.query(Project).filter_by(id=pid).first()
     db.session.delete(pro)
     db.session.commit()

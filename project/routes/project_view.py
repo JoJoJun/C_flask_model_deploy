@@ -79,7 +79,7 @@ def editPro():
 @project_bp.route('/deletePro/',methods = ['POST', 'GET'])#删除项目
 def deletePro():
     pid = request.form.get("id")
-    print('test'+pid)
+    print('test'+ pid)
     flag = goDeletePro(pid)
     res = {}
 
