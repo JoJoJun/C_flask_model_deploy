@@ -1,5 +1,5 @@
 import flask_login
-from flask import Flask, redirect, url_for,render_template,request,Blueprint
+from flask import Flask, redirect,render_template,request,Blueprint
 
 index_bp = Blueprint('index', __name__, url_prefix='/')
 
