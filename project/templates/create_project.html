@@ -90,14 +90,20 @@
             beforeSend:function () {
                 $('#loading').show();
             },
-            success:function(data){
+            success:function(res){
                 $('#loading').hide();
-                console.log(data);
-                if(data['code'] == 1000)
-                    window.location = '/project/view/'+data['msg'];
+                console.log(res);
+                if(res['code'] == 1000) {
+                    // alert('创建成功');
+                    window.location = '/project/view/'+res['msg'];
+                }
                 else {
-                    alert('创建失败');
-                    // 具体的错误信息展示
+                    // alert('创建失败');
+                    if([2004].indexOf(res['code']) != -1){
+                        let target_input = document.getElementById('project-name');
+                        clear_error_feedback(target_input);
+                        set_error_feedback(target_input, res['msg']);
+                    }
                 }
             }
         });

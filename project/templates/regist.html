@@ -61,7 +61,12 @@
 <script>
 	let target = $('#res');
 	let res = eval('(' + target[0].innerText + ')');
-	show_error_msg(1, res['msg']);
+	if([2002].indexOf(res['code']) != -1){
+		show_error_msg(4, res['msg']);
+	}
+	else if([2003].indexOf(res['code']) != -1){
+		show_error_msg(3, res['msg']);
+	}
 	target.remove();
 </script>
 {% endblock %}
