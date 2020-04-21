@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+import datetime
 
 engine = create_engine('mysql+pymysql://DaaS:flask2020@39.97.219.243/daas', convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,autoflush=False,bind=engine))
@@ -64,7 +65,14 @@ class Project(Base):
     state = Column(Integer)
 
     user1 = relationship('User', primaryjoin='Project.user == User.account', backref='projects')
-
+    def __init__(self, name,des,url,user,create_time,update_time):
+        self.name = name
+        self.description = des
+        self.route = url
+        self.user = user
+        self.create_time =create_time
+        self.update_time = update_time
+        self.state= 0
 
 
 class Record(Base):
