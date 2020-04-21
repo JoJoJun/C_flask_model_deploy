@@ -1,3 +1,5 @@
+/*jshint esversion: 6 */
+
 function show_error_msg(pos, error_msg){
     let error_div = document.createElement('div');
     error_div.classList.add('error-info');
@@ -14,4 +16,30 @@ function show_error_msg(pos, error_msg){
 
     let form_item = $('.form-item')[pos-1];
     form_item.after(error_div);
+}
+
+function clear_error_feedback(target_input) {
+    $(target_input).closest('div.form-group').children().filter('span').remove();
+    $(target_input).closest('div.form-group').removeClass('has-error has-feedback');
+}
+
+function set_error_feedback(target_input, error_msg) {
+    let parentDiv = $(target_input).closest('div.form-group');
+    parentDiv.addClass('has-error has-feedback');
+
+    if(target_input.type != 'file') {
+        let cross_icon = document.createElement('span');
+        cross_icon.setAttribute('class', 'glyphicon glyphicon-remove form-control-feedback');
+        cross_icon.setAttribute('aria-hidden', 'true');
+        parentDiv.append(cross_icon);
+    }
+
+    let exclamation_icon = document.createElement('span');
+    exclamation_icon.setAttribute('class', 'fa fa-exclamation-triangle form-error');
+    parentDiv.append(exclamation_icon);
+
+    let error_text = document.createElement('span');
+    error_text.setAttribute('class', 'form-error');
+    error_text.innerText = ' '+error_msg;
+    parentDiv.append(error_text);
 }

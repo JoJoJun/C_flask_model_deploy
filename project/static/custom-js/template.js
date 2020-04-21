@@ -18,8 +18,8 @@ function load_nav(items) {
 
 function item_map(item){
     let map_dict = {
-        '首页': '/index/',
-        '项目': '/index/'
+        '首页': '/project/',
+        '项目': '/project/'
     };
     if(map_dict.hasOwnProperty(item))
         return map_dict[item];
