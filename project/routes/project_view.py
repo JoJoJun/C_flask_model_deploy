@@ -1,5 +1,5 @@
 from project.models.model import User,Project
-from flask import Flask, redirect, url_for,render_template,request,Blueprint
+from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 
 from project.services.project_service import list_all_project, check_project_same_name,goDeletePro
 import flask_login
@@ -11,10 +11,10 @@ def hello_name(name):
    return 'Hello %s!' % name
 
 
-@project_bp.route('/view/')
-def project_list():
+@project_bp.route('/view/', methods=['GET', 'POST'])
+def project_view():
    list = list_all_project()
-   return render_template('index.html',user = flask_login.current_user,data=list)
+   return render_template('index.html', user=flask_login.current_user, data=list)
 
 
 @project_bp.route('/addPro/', methods=['GET', 'POST'])
@@ -25,10 +25,7 @@ def addPro():
    name = request.form['name']
    url = request.form['url']
    des = request.form['description']
-   print(name,url,des)
    user_account = flask_login.current_user.account
-   print(name, url, des)
-   # pro = Project.query.filter_by(name=name,user=user_account).first()
    res ={}
    if check_project_same_name(name,user_account):
       code = 2004
@@ -43,7 +40,8 @@ def addPro():
       db.session.commit()
       code = 1000
       msg='新建项目成功'
-      return redirect(url_for('project.view'))
+      # return redirect(url_for('project.project_view'))
+      return jsonify(res)
    # res['code']=code
    # res['msg']=msg
    # return render_template('index.html',user=flask_login.current_user,res=res)

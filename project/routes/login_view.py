@@ -54,7 +54,8 @@ def login():
         msg = 'You were successfully logged in'
         res['code']=code
         res['msg']=msg
-        return render_template('index.html',user = flask_login.current_user,data=list,res=res)
+        # return render_template('index.html',user = flask_login.current_user,data=list,res=res)
+        return redirect(url_for('project.project_view'))
 
     return render_template('login.html',user=None, res =res)
 
