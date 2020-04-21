@@ -100,4 +100,5 @@ if __name__ == '__main__':
     # debug 默认为false。 如果设置为true，则提供调试信息   options 要转发到底层的Werkzeug服务器
     app = project.create_app()
     app.run(debug = True)
+
 #    app.run(host='0.0.0.0')

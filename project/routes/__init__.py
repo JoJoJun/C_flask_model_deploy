@@ -7,6 +7,7 @@ import flask_login
 def init_app(app):
     app.register_blueprint(login_bp)
     app.register_blueprint(index_bp)
+
     login_manager.init_app(app)
     app.register_blueprint(project_bp)
     app.register_blueprint(model_bp)
