@@ -1,0 +1,129 @@
+{% extends 'template.html' %}
+
+{% block import %}
+<link rel="stylesheet" href="/static/bootstrap-select/dist/css/bootstrap-select.min.css">
+<script src="{{ url_for('static', filename = 'bootstrap-select/dist/js/bootstrap-select.js') }}"></script>
+<style>
+    label.required:before {
+        content: '* ';
+        color: red;
+    }
+    .has-feedback label~.form-control-feedback {
+        top: 32px;
+    }
+    .operate-button {
+        margin-bottom: 4%;
+    }
+    .operate-button button{
+        display: flex;
+        float: right;
+        margin-right: 5px;
+    }
+    .form-error {
+        color: darkred;
+        font-size: smaller;
+    }
+    div.form-inline div.radio {
+        width: 20%;
+    }
+    div.form-inline div.input-group{
+        width: 55%;
+    }
+</style>
+{% endblock %}
+
+{% block content_head %} 设置部署参数 {% endblock %}
+{% block content_inner %}
+<form style="width: 60%">
+    <div class="form-group">
+        <label class="required" for="model-version">模型版本</label>
+        <select class="form-control selectpicker" data-live-search="true" id="model-version" title="选择：模型版本">
+            <option>1.0</option>
+            <option>2.0</option>
+            <option>3.0</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="required" for="model-env">网络服务运行环境</label>
+        <select class="form-control selectpicker" data-live-search="true" id="model-env" title="选择：网络服务运行环境">
+            <option>环境1</option>
+            <option>环境2</option>
+            <option>环境3</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="required" for="model-env">预留CPU</label>
+        <div class="form-inline">
+            <div class="radio">
+                <label>
+                    <input type="radio" name="cpu" id="cpu-no" value="no" checked>
+                    不需要
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="cpu" id="cpu-yes" value="yes">
+                    需要
+                </label>
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" id="model-cpu" placeholder="如果需要，请填写预留CPU个数" disabled required>
+                <span class="input-group-addon">个</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="required" for="model-mem">预留内存</label>
+        <div class="form-inline">
+            <div class="radio">
+                <label>
+                    <input type="radio" name="mem" id="mem-no" value="no" checked>
+                    不需要
+                </label>
+            </div>
+            <div class="radio">
+                <label>
+                    <input type="radio" name="mem" id="mem-yes" value="yes">
+                    需要
+                </label>
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" id="model-mem" placeholder="如果需要，请填写预留内存大小" disabled required>
+                <span class="input-group-addon">M</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="operate-button">
+        <button type="button" class="btn btn-primary create" disabled="disabled">确定</button>
+        <button type="button" class="btn btn-default cancel">取消</button>
+    </div>
+</form>
+<!-- 转圈动画 -->
+<div id="loading" class="submit_loading" style="display:none">
+    <div class="loading_show">
+        <img src="/static/image/loading.gif">
+        <p class="loading_context">正在设置部署参数，请稍候。。。</p>
+    </div>
+</div>
+<script>
+    let nav_list = ['首页', '项目', '查看项目', '查看模型', '设置部署参数'];
+    $(function () {
+        load_nav(nav_list);
+    });
+    $('input[name=cpu], input[name=mem]').change(function(){
+        console.log(this);
+        console.log(this.value);
+        if(this.value == 'yes'){
+            $(this.closest('div.form-inline').querySelector('input[type=text]')).attr('disabled', false);
+        }else if(this.value == 'no'){
+            $(this.closest('div.form-inline').querySelector('input[type=text]')).attr('disabled', true);
+        }else{
+            alert('input radio value error.');
+        }
+    })
+</script>
+{% endblock %}

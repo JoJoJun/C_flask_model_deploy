@@ -167,7 +167,6 @@
             tableData[i].type = data[i].type;
             tableData[i].file = data[i].file;
             tableData[i].version = data[i].version;
-            tableData[i].description = data[i].description;
             tableData[i].operation = data[i].id;
         }
         let tableColumns = [
@@ -175,7 +174,6 @@
             {field: 'type', title: '类型', sortable: true},
             {field: 'file', title: '文件', sortable: true},
             {field: 'version', title: '版本', sortable: true},
-            {field: 'description', title: '描述', sortable: true},
             {field: 'operation', title: '操作',
                 formatter: function(value,row,index){
                     let viewBtn   = '<button id=\"view-'+value+'\" type="button" class="btn btn-success view">查看</button>';
@@ -215,7 +213,7 @@
         });
         // 设置参数按钮
         $(document).on('click', 'button[data-target="#edit-modal"]', function () {
-
+            window.location = "/model/parm/"+this.id.split('-')[1];
         });
         // 删除按钮
         $(document).on('click', 'button[data-target="#delete-confirm-modal"]', function () {
