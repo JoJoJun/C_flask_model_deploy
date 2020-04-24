@@ -1,7 +1,7 @@
 from project.models.model import User,Project
 from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 
-from project.services.project_service import list_all_project, check_project_same_name,goDeletePro
+from project.services.project_service import list_all_project, check_project_same_name,goDeletePro,edit_Pro
 import flask_login
 import datetime
 from project.models import db
@@ -55,12 +55,11 @@ def editPro():
       return render_template('index.html',user = flask_login.current_user)
    id = request.form['id']
    name = request.form['name']
-   print(name)
    url = request.form['url']
    des = request.form['description']
    res = {}
-   user_account = flask_login.current_user.account
-#   user_account = '123@123.com'
+#   user_account = flask_login.current_user.account
+   user_account = '123@123.com'
    if check_project_same_name(name, user_account):
        code = 2004
        msg = '用户名下已存在同名项目'
@@ -68,13 +67,14 @@ def editPro():
        res['msg'] = msg
        return render_template('index.html', user=flask_login.current_user, res=res)
    else:
-       pro = Project.query.filter_by(id=id).first()
-       pro.name = name
-       pro.url = url
-       pro.description = des
-       db.session.commit()
-       res['code'] = 1000
-       res['msg'] = '操作成功'
+#       Project.query.filter_by(id=id).update({'name': name,'route':url,'description':des})
+       flag = edit_Pro(id,name,url,des)
+       if flag:
+            res['code'] = 1000
+            res['msg'] = '操作成功'
+       else:
+            res['code'] = 1004
+            res['msg'] = '操作失败'
        return jsonify(res)
 
 @project_bp.route('/deletePro/',methods = ['POST', 'GET'])#删除项目
