@@ -1,10 +1,11 @@
 from project.models.model import User,Project
 from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 
-from project.services.project_service import list_all_project, check_project_same_name,goDeletePro,edit_Pro
+from project.services.project_service import list_all_project, check_project_same_name,goDeletePro,edit_Pro,get_detail_byid
 import flask_login
 import datetime
 from project.models import db
+from project.services.model_service import model_list
 project_bp = Blueprint('project', __name__, url_prefix='/project')
 
 
@@ -93,5 +94,13 @@ def deletePro():
         return render_template('index.html', user=flask_login.current_user, res=res)
 
 
+# 查看项目
+@project_bp.route('/view/<project_id>',methods = ['POST', 'GET'])
+def viewPro(project_id):
+    print(project_id)
+    modellist = model_list(project_id)
+    info= get_detail_byid(project_id)
+    info['model_list']=modellist
+    return render_template('project.html',user=flask_login.current_user,project_info=info)
 
 

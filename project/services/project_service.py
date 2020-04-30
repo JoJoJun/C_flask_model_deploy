@@ -2,7 +2,7 @@ from project.models.model import Project,User,SQLAlchemy
 from flask_login import current_user
 from project.models import db
 from datetime import datetime
-
+# 用户名下所有项目信息
 def list_all_project():
     # user = User.query.filter_by(account = current_user).first()
     list = Project.query.filter_by(state=0,user=current_user.account).all()
@@ -17,6 +17,21 @@ def list_all_project():
         data.append(d)
     print(data)
     return data
+
+
+# 根据id得到项目信息
+def get_detail_byid(project_id):
+    l = Project.query.filter_by(state=0,id=project_id).first()
+
+    d = {}
+    d['name'] = l.name
+    d['url'] = l.route
+    d['create_time'] = str(l.create_time)
+    d['update_time'] = str(l.update_time)
+    d['id'] = l.id
+    d['description'] = l.description
+    # print(d)
+    return d
 
 
 # user name的project是否已存在
