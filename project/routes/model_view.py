@@ -2,7 +2,7 @@ from flask import render_template,request,Blueprint,jsonify,redirect
 import flask_login
 import datetime
 from project.models.model import Model
-from project.services.model_service import getVersion,checkAdd,getFile
+from project.services.model_service import getVersion,checkAdd,getFile,delete_model
 
 from project.models import db
 model_bp = Blueprint('model', __name__, url_prefix='/model')
@@ -63,6 +63,30 @@ def addModel():
             else:
                 res['code'] = 1004
                 res['msg'] = '创建失败'
+    except:
+        res['code'] = '100x'
+        res['msg'] = '服务器错误，请检查参数'
+    return jsonify(res)
+
+
+@model_bp.route('/deleteModel/', methods=['GET', 'POST'])#删除模型
+def deleteModel():
+    if request.method == 'GET':
+        return render_template('create_model.html', user=flask_login.current_user)
+    res = {}
+    try:
+        id = request.form['model_id']
+        if (len(id) == 0):
+            res['code'] = '100x'
+            res['msg'] = '参数数据缺失'
+        else:
+            flag = delete_model(id)
+            if flag:
+                res['code'] = 1000
+                res['msg'] = '删除成功'
+            else:
+                res['code'] = 1004
+                res['msg'] = '删除失败'
     except:
         res['code'] = '100x'
         res['msg'] = '服务器错误，请检查参数'

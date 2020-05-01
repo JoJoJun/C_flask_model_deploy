@@ -24,6 +24,17 @@ def getFile(url,name):
     fid = File.query.filter_by(path=url, name =name).first().id
     return fid
 
+#删除模型
+def delete_model(id):
+    model = db.session.query(Model).filter_by(id=id).first()
+    db.session.delete(model)
+    db.session.commit()
+
+    if Model.query.filter_by(id=id).first():
+        return False
+    else:
+        return True
+
 # 由项目id模型列表
 def model_list(pro_id):
     list = Model.query.filter_by(state=0, project=pro_id).all()
