@@ -1,4 +1,4 @@
-from project.models.model import Project,User,SQLAlchemy,Model
+from project.models.model import Project,User,SQLAlchemy,Model,File
 from project.models import db
 from datetime import datetime
 
@@ -15,6 +15,14 @@ def checkAdd(pid,name,version):
         flag = True
     return flag
 
+#找到模型文件id
+def getFile(url,name):
+    dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    new_file = File(create_time=dt, update_time=dt,name = name,path=url,type=1)
+    db.session.add(new_file)
+    db.session.commit()
+    fid = File.query.filter_by(path=url, name =name).first().id
+    return fid
 
 # 由项目id模型列表
 def model_list(pro_id):
