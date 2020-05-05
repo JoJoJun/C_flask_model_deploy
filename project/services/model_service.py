@@ -1,4 +1,4 @@
-from project.models.model import Project,User,SQLAlchemy,Model,File
+from project.models.model import Project,User,SQLAlchemy,Model,File,Record
 from project.models import db
 from datetime import datetime
 
@@ -34,6 +34,22 @@ def delete_model(id):
         return False
     else:
         return True
+def findRecord(id):
+    flag = False
+    if Record.query.filter_by(model = id).all():
+        flag = True
+    return flag
+def edit_param(id,RTenvironment,cpu,memory):
+    flag = False
+    rec = db.session.query(Record).filter_by(model=id).first()
+    rec.RTenvironment = RTenvironment
+    rec.cpu = cpu
+    rec.memory = memory
+
+    db.session.commit()
+    if db.session.query(Record).filter_by(model = id,memory=memory,cpu=cpu,RTenvironment=RTenvironment).first():
+        flag = True
+    return flag
 
 # 由项目id模型列表
 def model_list(pro_id):
