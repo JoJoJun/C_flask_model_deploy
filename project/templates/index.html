@@ -76,7 +76,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal" id="save-edit">保存更改</button>
+                <button type="button" class="btn btn-primary" id="save-edit">保存更改</button>
             </div>
         </div>
     </div>
@@ -104,32 +104,22 @@
 <script>
     let projects_data = {{ data|safe }};
     let nav_list = ['首页', '项目'];
+    let href_list = ['/project/', '/project/'];
     let current_delete_btn;
     let current_project_id;
+    let error_msg = '';
     $(function () {
-        load_nav(nav_list);
+        load_nav(nav_list, href_list);
         load_table(projects_data);
     });
-    $("#project-name, #project-route").blur(function(){
+    $("#project-name, #project-route").blur(function() {
         // 先清空所有的span元素
-        $(this).parent().children().filter('span').remove();
-        $(this).parent().removeClass('has-error has-feedback');
+        clear_error_feedback(this, 'div.col-sm-10');
         // 校验
-        let content = $(this).val().trim();
-        if(content == ""){
-            let parentDiv = $(this).parent();
-            parentDiv.addClass('has-error has-feedback');
-            let glyphicon = document.createElement('span');
-            glyphicon.setAttribute('class', 'glyphicon glyphicon-remove form-control-feedback');
-            glyphicon.setAttribute('aria-hidden', 'true');
-            let span_fa = document.createElement('span');
-            span_fa.setAttribute('class', 'fa fa-exclamation-triangle form-error');
-            let span_text = document.createElement('span');
-            span_text.setAttribute('class', 'form-error');
-            span_text.innerText = ' 不可为空';
-            parentDiv.append(glyphicon);
-            parentDiv.append(span_fa);
-            parentDiv.append(span_text);
+        let value = $(this).val().trim();
+        if (value == "") {
+            error_msg = "不可为空";
+            set_error_feedback(this, 'div.col-sm-10', error_msg);
         }
         // 按钮禁用/启用
         if ($('#project-name').val().trim() == '' || $('#project-route').val().trim() == '')
@@ -148,16 +138,19 @@
             type: "POST",
             data: upload_data,
             dataType: 'json',
-            beforeSend:function () {
+            beforeSend: function () {
                 // $('#loading').show();
             },
-            success:function(data){
-                // $('#loading').hide();
-                console.log(data);
-                if(data['code'] == 3000)
-                    alert('保存修改成功');
-                else
-                    alert('保存修改失败');
+            success: function (res) {
+                console.log(res);
+                if (res['code'] == 3000) {
+                    location.reload();
+                } else if ([2004].indexOf(res['code']) != -1) {
+                    let target_input = document.getElementById('project-name');
+                    clear_error_feedback(target_input, 'div.col-sm-10');
+                    set_error_feedback(target_input, 'div.col-sm-10', res['msg']);
+                    // alert('保存修改失败');
+                }
             }
         });
     });

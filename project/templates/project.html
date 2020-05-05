@@ -37,7 +37,7 @@
     <div class="l-box pure-u-1 pure-u-md-1-2 pure-u-lg-1-5">
         <h3 class="content-subhead">
             <i class="fa fa-podcast"></i>
-            名称
+            项目名称
         </h3>
         <p id="name"></p>
     </div>
@@ -74,7 +74,7 @@
             <i class="fa fa-tags"></i>
             描述
         </h3>
-        <p id="description">Phasellus eget</p>
+        <p id="description"></p>
     </div>
 </div>
 
@@ -113,12 +113,13 @@
 <script>
     let project_data = {{ project_info | safe }};
     let nav_list = ['首页', '项目', '查看项目'];
+    let href_list = ['/project/', '/project/'];
     let current_delete_btn;
     let current_model_id;
     $(function () {
-        load_nav(nav_list);
+        load_nav(nav_list, href_list);
         load_basic_info(project_data);
-        load_table(project_data['model_list']);
+        load_models_table(project_data['model_list']);
     });
     $('#delete-yes').click(function () {
         $.ajax({
@@ -142,44 +143,53 @@
             }
         });
     });
-    function  load_basic_info(data) {
+
+    function load_basic_info(data) {
         let keys = ['name', 'url', 'create_time', 'update_time', 'model_count', 'description'];
-        for(let key of keys){
+        if (data['model_list'].length == 0) $('#model_count').css('color', 'grey');
+        if (data['description'] == '') $('#description').css('color', 'grey');
+        for (let key of keys) {
             let text = "";
             switch (key) {
                 case 'model_count':
                     let count = data['model_list'].length;
-                    text = count==0 ? "暂无模型" : count.toString()+'个模型';
+                    text = count == 0 ? "暂无模型" : count.toString() + '个模型';
                     break;
                 case 'description':
-                    text = data[key]=='' ? '暂无描述' : data[key];
+                    text = data[key] == '' ? '暂无描述' : data[key];
                     break;
-                default : text = data[key];
+                default :
+                    text = data[key];
             }
-            $('#'+key).text(text);
+            $('#' + key).text(text);
         }
     }
-    function load_table(data) {
+
+    function load_models_table(data) {
         let tableData = new Array();
-        for(let i = 0; i < data.length; i++){
+        for (let i = 0; i < data.length; i++) {
             tableData[i] = new Object();
             tableData[i].name = data[i].name;
             tableData[i].type = data[i].type;
-            tableData[i].file = data[i].file;
             tableData[i].version = data[i].version;
             tableData[i].operation = data[i].id;
         }
         let tableColumns = [
-            {field: 'name', title: '名称', sortable: true},
+            {
+                field: 'name', title: '名称', sortable: true,
+                formatter: function (value, row, index) {
+                    return "<span style='font-weight: bold'>" + value + "</span>";
+                }
+            },
             {field: 'type', title: '类型', sortable: true},
-            {field: 'file', title: '文件', sortable: true},
             {field: 'version', title: '版本', sortable: true},
-            {field: 'operation', title: '操作',
-                formatter: function(value,row,index){
-                    let viewBtn   = '<button id=\"view-'+value+'\" type="button" class="btn btn-success view">查看</button>';
-                    let editBtn   = '<button id=\"edit-'+value+'\" type="button" class="btn btn-info" data-toggle="modal" data-target="#edit-modal">设置参数</button>';
-                    let deleteBtn = '<button id=\"del-'+value+'\" type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-confirm-modal">删除</button>';
-                    return viewBtn +'&nbsp;'+ editBtn +'&nbsp;'+ deleteBtn;
+            {
+                field: 'operation', title: '操作',
+                formatter: function (value, row, index) {
+                    let viewBtn = '<button id=\"view-' + value + '\" type="button" class="btn btn-success view">查看详情</button>';
+                    let editBtn = '<button id=\"edit-' + value + '\" type="button" class="btn btn-info" data-toggle="modal" data-target="#edit-modal">设置参数</button>';
+                    let deleteBtn = '<button id=\"del-' + value + '\" type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete-confirm-modal">删除模型</button>';
+                    return viewBtn + '&nbsp;' + editBtn + '&nbsp;' + deleteBtn;
                 }
             }
         ];
