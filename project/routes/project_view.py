@@ -1,10 +1,11 @@
 from project.models.model import User,Project
 from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 
-from project.services.project_service import list_all_project, check_project_same_name,goDeletePro
+from project.services.project_service import list_all_project, check_project_same_name,goDeletePro,edit_Pro,get_detail_byid
 import flask_login
 import datetime
 from project.models import db
+from project.services.model_service import model_list
 project_bp = Blueprint('project', __name__, url_prefix='/project')
 
 
@@ -52,7 +53,7 @@ def addPro():
 @project_bp.route('/editPro/', methods=['GET', 'POST'])#编辑项目
 def editPro():
    if request.method == 'GET':
-      return render_template('create_project.html',user = flask_login.current_user)
+      return render_template('index.html',user = flask_login.current_user)
    id = request.form['id']
    name = request.form['name']
    url = request.form['url']
@@ -67,15 +68,15 @@ def editPro():
        res['msg'] = msg
        return render_template('index.html', user=flask_login.current_user, res=res)
    else:
-       pro = db.session.query(Project).filter_by(id=id).first()
-
-       pro.name = name
-       pro.url = url
-       pro.description = des
-       db.session.commit()
-       res['code'] = 1000
-       res['msg'] = '操作成功'
-       return render_template('index.html', user=flask_login.current_user, res=res)
+#       Project.query.filter_by(id=id).update({'name': name,'route':url,'description':des})
+       flag = edit_Pro(id,name,url,des)
+       if flag:
+            res['code'] = 1000
+            res['msg'] = '操作成功'
+       else:
+            res['code'] = 1004
+            res['msg'] = '操作失败'
+       return jsonify(res)
 
 @project_bp.route('/deletePro/',methods = ['POST', 'GET'])#删除项目
 def deletePro():
@@ -83,17 +84,23 @@ def deletePro():
     print('test'+ pid)
     flag = goDeletePro(pid)
     res = {}
-
-
     if flag:  # 删除成功
         res['code'] = 1000
         res['msg'] = '删除成功'
-        return render_template('index.html', user=flask_login.current_user, res=res)
+        return jsonify(res)
     else:
         res['code'] = 1004
         res['msg'] = '删除失败'
         return render_template('index.html', user=flask_login.current_user, res=res)
 
 
+# 查看项目
+@project_bp.route('/view/<project_id>',methods = ['POST', 'GET'])
+def viewPro(project_id):
+    print(project_id)
+    modellist = model_list(project_id)
+    info= get_detail_byid(project_id)
+    info['model_list']=modellist
+    return render_template('project.html',user=flask_login.current_user,project_info=info)
 
 
