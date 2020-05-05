@@ -57,23 +57,21 @@
 </div>
 <script>
     let nav_list = ['首页', '项目', '创建项目'];
+    let href_list = ['/project/', '/project/'];
     $(function () {
-        load_nav(nav_list);
+        load_nav(nav_list, href_list);
     });
+    /** 文本框.blur **/
     $("#project-name, #project-route").blur(function(){
         // 先清空所有的span元素
-        clear_error_feedback(this);
+        clear_error_feedback(this, 'div.form-group');
         // 校验
         let value = $(this).val().trim();
         if(value == ""){
             let error_msg = "不可为空";
-            set_error_feedback(this, error_msg);
+            set_error_feedback(this, 'div.form-group', error_msg);
         }
-        // 按钮禁用/启用
-        if ($('#project-name').val().trim() == '' || $('#project-route').val().trim() == '')
-            $('.create').attr('disabled', true);
-        else
-            $('.create').attr('disabled', false);
+        button_disable_or_not();
     });
     $('.cancel').click(function () {
         window.location = '/project/';
@@ -99,14 +97,22 @@
                 }
                 else {
                     // alert('创建失败');
-                    if([2004].indexOf(res['code']) != -1){
+                    if ([2004].indexOf(res['code']) != -1) {
                         let target_input = document.getElementById('project-name');
-                        clear_error_feedback(target_input);
-                        set_error_feedback(target_input, res['msg']);
+                        clear_error_feedback(target_input, 'div.form-group');
+                        set_error_feedback(target_input, 'div.form-group', res['msg']);
                     }
                 }
             }
         });
     });
+
+    /** 确定按钮 disable or not **/
+    function button_disable_or_not() {
+        if ($('#project-name').val().trim() == '' || $('#project-route').val().trim() == '')
+            $('.create').attr('disabled', true);
+        else
+            $('.create').attr('disabled', false);
+    }
 </script>
 {% endblock %}

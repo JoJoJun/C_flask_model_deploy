@@ -1,7 +1,13 @@
-.splash-container{
+.splash-container {
     background: #31708f;
 }
-.pure-menu-item{
+
+.home-menu {
+    padding-top: 0.2em;
+    padding-bottom: 0;
+}
+
+.pure-menu-item {
     text-transform: uppercase;
 }
 .home-menu a{

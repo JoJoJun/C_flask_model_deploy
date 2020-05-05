@@ -7,7 +7,6 @@
     <title>DaaS</title>
     <link rel="stylesheet" href="/static/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/css/pure-min.css">
-    <link rel="stylesheet" href="/static/custom-css/root.css">
     <link rel="stylesheet" href="/static/font-awesome/css/font-awesome.min.css">
 
     <!--[if lte IE 8]>
@@ -24,6 +23,7 @@
     <link rel="stylesheet" href="/static/css/layouts/marketing.css">
     <!--<![endif]-->
 
+    <link rel="stylesheet" href="/static/custom-css/root.css">
     <script type = "text/javascript" src="{{ url_for('static', filename = 'js/jquery-3.3.1.min.js') }}"></script>
     <script type = "text/javascript" src="{{ url_for('static', filename = 'bootstrap/dist/js/bootstrap.min.js') }}"></script>
     <script type = "text/javascript" src = "{{ url_for('static', filename = 'custom-js/error.js') }}" ></script>
@@ -50,7 +50,7 @@
 {% block content %} {% endblock %}
 
 <div class="content-wrapper" style="min-height: 0;">
-    <div class="footer l-box is-center" style="padding: 0.6em;">
+    <div class="footer l-box is-center" style="padding: 0.4em;">
         <a href="https://github.com/bhsei/20_C" style="color: white;text-decoration: unset;">
             <i class="fa fa-github-square" aria-hidden="true"></i>
             Github

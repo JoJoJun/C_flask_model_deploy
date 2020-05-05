@@ -1,14 +1,15 @@
-function load_nav(items) {
+/*jshint esversion: 6 */
+
+function load_nav(items, hrefs) {
     let breadcrumb = $('.breadcrumb');
-    for(let i = 0; i < items.length; i++){
+    for (let i = 0; i < items.length; i++) {
         let li = document.createElement('li');
-        if(i == items.length-1){
+        if (i == items.length - 1) {
             li.classList.add('active');
             li.innerText = items[i];
-        }
-        else{
+        } else {
             let a = document.createElement('a');
-            a.setAttribute('href', item_map(items[i]));
+            a.setAttribute('href', hrefs[i]);
             a.innerText = items[i];
             li.appendChild(a);
         }
@@ -16,7 +17,7 @@ function load_nav(items) {
     }
 }
 
-function item_map(item){
+/*function item_map(item){
     let map_dict = {
         '首页': '/project/',
         '项目': '/project/'
@@ -25,4 +26,4 @@ function item_map(item){
         return map_dict[item];
     else
         return '#';
-}
+}*/

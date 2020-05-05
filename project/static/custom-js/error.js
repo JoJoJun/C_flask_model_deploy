@@ -18,16 +18,16 @@ function show_error_msg(pos, error_msg){
     form_item.after(error_div);
 }
 
-function clear_error_feedback(target_input) {
-    $(target_input).closest('div.form-group').children().filter('span').remove();
-    $(target_input).closest('div.form-group').removeClass('has-error has-feedback');
+function clear_error_feedback(target_input, parent_div) {
+    $(target_input).closest(parent_div).children().filter('span').remove();
+    $(target_input).closest(parent_div).removeClass('has-error has-feedback');
 }
 
-function set_error_feedback(target_input, error_msg) {
-    let parentDiv = $(target_input).closest('div.form-group');
+function set_error_feedback(target_input, parent_div, error_msg) {
+    let parentDiv = $(target_input).closest(parent_div);
     parentDiv.addClass('has-error has-feedback');
 
-    if(target_input.type != 'file') {
+    if (target_input.type != 'file') {
         let cross_icon = document.createElement('span');
         cross_icon.setAttribute('class', 'glyphicon glyphicon-remove form-control-feedback');
         cross_icon.setAttribute('aria-hidden', 'true');
