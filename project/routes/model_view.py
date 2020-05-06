@@ -50,7 +50,7 @@ def addModel():
             print(name)
             fid = getFile(fileUrl,name)
             new_model = Model(project=pid, name=name, type=type, description=des,
-                          version=version, file=fid, create_time=dt, update_time=dt)
+                          version=version, file=fid, create_time=dt, update_time=dt,state=0)
             db.session.add(new_model)
             db.session.commit()
             flag = checkAdd(pid, name, version)
