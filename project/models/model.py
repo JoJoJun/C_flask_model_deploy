@@ -9,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import datetime
 
-engine = create_engine('mysql+pymysql://DaaS:flask2020@39.97.219.243/daas', convert_unicode=True)
+engine = create_engine('mysql+pymysql://DaaS:flask2020@39.97.219.243/DaaS', convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,autoflush=False,bind=engine))
 Base = declarative_base()
 metadata = Base.metadata

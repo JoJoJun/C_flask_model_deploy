@@ -14,5 +14,5 @@ class Config:
     # Database
     # SQLALCHEMY_DATABASE_URI = environ.get('mysql+pymysql://DaaS:flask2020@39.97.219.243/daas')
     # 之前一直Nonetype 是因为环境变量里没有叫这个的environ
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://DaaS:flask2020@39.97.219.243/daas'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://DaaS:flask2020@39.97.219.243/DaaS'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
