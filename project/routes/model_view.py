@@ -1,7 +1,7 @@
 from flask import render_template,request,Blueprint,jsonify,redirect
 import flask_login
 import datetime
-from project.models.model import Model
+from project.models.model import Model,Record
 from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param
 
 from project.models import db
@@ -104,6 +104,7 @@ def editParam():
             res['msg'] = '参数数据缺失'
         else:
             flag = findRecord(id)
+            print(flag)
             if flag:   #已经有了，修改
                 if edit_param(id,RTenvironment,cpu,memory):
                     res['code'] = '1000'
@@ -113,8 +114,9 @@ def editParam():
                     res['msg'] = '修改失败'
             else:   #还没有，新增
                 dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                new_Record = Model(model=id, RTenvironment=RTenvironment, cpu=cpu, memory=memory,
-                                   state = 0,create_time=dt, update_time=dt)
+                new_Record = Record(model=id, RTenvironment=RTenvironment, cpu=cpu, url='/url',memory=memory,
+                                   state = 0,load=0,create_time=dt)
+                print(dt)
                 db.session.add(new_Record)
                 db.session.commit()
                 if findRecord(id):
