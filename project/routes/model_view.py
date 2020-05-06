@@ -47,13 +47,13 @@ def addModel():
             res['msg'] = '参数数据缺失'
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(name)
             fid = getFile(fileUrl,name)
             new_model = Model(project=pid, name=name, type=type, description=des,
                           version=version, file=fid, create_time=dt, update_time=dt)
             db.session.add(new_model)
             db.session.commit()
             flag = checkAdd(pid, name, version)
-
             if flag:
                 res['code'] = 1000
                 res['msg'] = '创建成功'

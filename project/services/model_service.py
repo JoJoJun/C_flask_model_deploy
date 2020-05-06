@@ -11,14 +11,16 @@ def getVersion(pid,name):#项目id和模型名称
 
 def checkAdd(pid,name,version):
     flag = False
-    if Model.query.filter_by(name=name,project = pid,version=version).all():
+    if db.session.query(Model).filter_by(name=name,project = pid,version=version).first():
         flag = True
+    print(flag)
     return flag
 
 #找到模型文件id
 def getFile(url,name):
-    dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    new_file = File(create_time=dt, update_time=dt,name = name,path=url,type=1)
+    dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    new_file = File(create_time=dt, update_time=dt,name = name,path=url,type=1,state=0)
+
     db.session.add(new_file)
     db.session.commit()
     fid = File.query.filter_by(path=url, name =name).first().id
@@ -30,23 +32,25 @@ def delete_model(id):
     db.session.delete(model)
     db.session.commit()
 
-    if Model.query.filter_by(id=id).first():
+    if db.session.query(Model).filter_by(id=id).first():
         return False
     else:
         return True
 def findRecord(id):
     flag = False
-    if Record.query.filter_by(model = id).all():
+    if db.session.query(Record).filter_by(model = id).first():
         flag = True
     return flag
+
 def edit_param(id,RTenvironment,cpu,memory):
     flag = False
     rec = db.session.query(Record).filter_by(model=id).first()
+
     rec.RTenvironment = RTenvironment
     rec.cpu = cpu
     rec.memory = memory
-
     db.session.commit()
+
     if db.session.query(Record).filter_by(model = id,memory=memory,cpu=cpu,RTenvironment=RTenvironment).first():
         flag = True
     return flag
