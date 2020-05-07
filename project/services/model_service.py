@@ -76,3 +76,34 @@ def model_list(pro_id):
         data.append(d)
     # print(data)
     return data
+
+
+# 由model id得到model信息
+def get_model_detail_by_id(model_id):
+    l = Model.query.filter_by(state=0, id=model_id).first()
+    d = {}
+    d['name'] = l.name
+    d['type'] = l.type
+    d['create_time'] = str(l.create_time)
+    d['update_time'] = str(l.update_time)
+    d['id'] = l.id
+    d['algorithm'] = l.algorithm
+    d['RTengine'] = l.RTengine
+    d['description'] = l.description
+    d['version'] = l.version
+    d['assessment'] = l.assessment
+    file = get_file_detail_by_id(l.file)
+    d['file']=file['path']
+    return d
+
+
+# 由file id 得到file detail
+def get_file_detail_by_id(file_id):
+    f = File.query.filter_by(id=file_id).first()
+    data = {}
+    data['name']=f.name
+    data['path']=f.path
+    data['type']=f.type
+    data['create_time']=f.create_time
+    data['update_time']=f.update_time
+    return data

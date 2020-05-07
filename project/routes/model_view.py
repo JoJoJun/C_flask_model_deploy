@@ -2,8 +2,8 @@ from flask import render_template,request,Blueprint,jsonify,redirect
 import flask_login
 import datetime
 from project.models.model import Model,Record
-from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param
-
+from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id
+from project.services.record_service import get_record_detail_by_model
 from project.models import db
 model_bp = Blueprint('model', __name__, url_prefix='/model')
 # 登录后的全部项目列表页
@@ -129,3 +129,37 @@ def editParam():
         res['code'] = '100x'
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
+
+
+# 查看模型
+@model_bp.route('/view/<model_id>', methods=['GET', 'POST'])
+def viewModel(model_id):
+    print(model_id)
+    if not flask_login.current_user:
+        return render_template('login.html',user=flask_login.current_user)
+    list = get_model_detail_by_id(model_id)
+    record = get_record_detail_by_model(model_id)
+    info = {}
+    basic={}
+    deploy={}
+    basic['name']=list['name']
+    basic['type']=list['type']
+    basic['version']=list['version']
+    basic['file']=list['file']
+    basic['description']=list['description']
+    if record:
+        deploy['env']= record.RTenvironment
+        deploy['cpu']=record.cpu
+        deploy['mem']=record.memory
+        deploy['url']=record.url
+        deploy['state']=record.state
+    else:
+        deploy['env']=''
+        deploy['cpu']=''
+        deploy['mem']=''
+        deploy['url']=''
+        deploy['state']=0
+    info['basic']=basic
+    info['deploy']=deploy
+    print(info)
+    return render_template('model.html', user=flask_login.current_user, model_info=info)
