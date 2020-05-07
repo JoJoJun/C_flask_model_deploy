@@ -60,12 +60,27 @@ def addModel():
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(name)
             file_dir = os.path.join(os.getcwd(), 'files')
-
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
             if f:
                 file_path = os.path.join(file_dir, f.filename)  # filename是f的固有属性
                 f.save(file_path)  # 保存到指定目录
+
+                if f.filename.endswith('.zip'):# 如果是zip文件，解压,并获取文件夹路径（没有后缀名
+                    print(f.filename.endswith('.zip'))
+
+                    zip_file = zipfile.ZipFile(file_path)
+                    zip_list = zip_file.namelist()  # 得到压缩包里所有文件
+
+                    for f in zip_list:
+                        zip_file.extract(f, file_dir)  # 循环解压文件到指定目录
+
+                    zip_file.close()  # 关闭文件，必须有，释放内存
+                    # 重新确定文件夹路径
+                    (path, tempfilename) = os.path.split(file_path)
+                    (filename, extension) = os.path.splitext(tempfilename)
+                    print((filename, extension))
+                    file_path = os.path.join(path, filename)
             fid = getFile(file_path,name)
             new_model = Model(project=pid, name=name, type=type, description=des,
                           version=version, file=fid, create_time=dt, update_time=dt,state=0)
@@ -197,5 +212,19 @@ def upFile():
         print(f.filename)
         print(file_path)
         print(allowed_file(f.filename))
+        print(f.filename.endswith('.txt'))
+        zip_file = zipfile.ZipFile(file_path)
+        zip_list = zip_file.namelist()  # 得到压缩包里所有文件
+
+        for f in zip_list:
+            zip_file.extract(f, file_dir)  # 循环解压文件到指定目录
+
+        zip_file.close()  # 关闭文件，必须有，释放内存
+        (filepath, tempfilename) = os.path.split(file_path)
+        print(file_path)
+        (filename, extension) = os.path.splitext(tempfilename)
+        print((filename, extension))
+        file_path = os.path.join(filepath,filename)
+        print(file_path)
     res = {}
     return res
