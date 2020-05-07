@@ -1,12 +1,20 @@
 from flask import render_template,request,Blueprint,jsonify,redirect
 import flask_login
 import datetime
+import os
+import zipfile
 from project.models.model import Model,Record
 from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id
 from project.services.record_service import get_record_detail_by_model
 from project.models import db
 model_bp = Blueprint('model', __name__, url_prefix='/model')
-# 登录后的全部项目列表页
+# 对项目模型的各种操作
+
+ALLOWED_EXTENSIONS = set(['pb', 'h5', 'pt', 'py', 'zip'])
+
+# 用于判断文件后缀，可调用
+def allowed_file(file):
+    return '.' in file and file.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 @model_bp.route('/checkVersion/',methods=['GET', 'POST'])
 def checkVersion():#检查版本
@@ -40,15 +48,25 @@ def addModel():
         type = request.form['type']
         des = request.form['description']
         version = request.form['version']  # 需要再发一遍回来吧，确认用？
-        fileUrl = '/url'#这个file是前端给url还是后端写个接口？
+        f = request.files['file']
         pid = request.form['project_id']
-        if (len(type) == 0 or len(name) == 0 or len(version)==0 or len(fileUrl)==0 or len(pid)==0):
+        if (len(type) == 0 or len(name) == 0 or len(version)==0 or len(pid)==0):
             res['code'] = '100x'
             res['msg'] = '参数数据缺失'
+        elif not allowed_file(f.filename):
+            res['code'] = '100x'
+            res['msg'] = '文件格式错误'  #还少文件夹解压
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(name)
-            fid = getFile(fileUrl,name)
+            file_dir = os.path.join(os.getcwd(), 'files')
+
+            if not os.path.exists(file_dir):
+                os.makedirs(file_dir)
+            if f:
+                file_path = os.path.join(file_dir, f.filename)  # filename是f的固有属性
+                f.save(file_path)  # 保存到指定目录
+            fid = getFile(file_path,name)
             new_model = Model(project=pid, name=name, type=type, description=des,
                           version=version, file=fid, create_time=dt, update_time=dt,state=0)
             db.session.add(new_model)
@@ -163,3 +181,21 @@ def viewModel(model_id):
     info['deploy']=deploy
     print(info)
     return render_template('model.html', user=flask_login.current_user, model_info=info)
+
+
+@model_bp.route('/upFile/', methods=['GET', 'POST'])#测试文件上传
+def upFile():
+    f = request.files['file']
+
+    file_dir = os.path.join(os.getcwd(), 'files')
+
+    if not os.path.exists(file_dir):
+        os.makedirs(file_dir)
+    if f:
+        file_path = os.path.join(file_dir, f.filename)  # filename是f的固有属性
+        f.save(file_path)  # 保存到指定目录
+        print(f.filename)
+        print(file_path)
+        print(allowed_file(f.filename))
+    res = {}
+    return res
