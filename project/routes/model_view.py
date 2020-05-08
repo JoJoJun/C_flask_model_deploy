@@ -2,6 +2,7 @@ from flask import render_template,request,Blueprint,jsonify,redirect
 import flask_login
 import datetime
 import os
+import yaml
 import zipfile
 from project.models.model import Model,Record
 from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id
@@ -59,7 +60,8 @@ def addModel():
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(name)
-            file_dir = os.path.join(os.getcwd(), 'files')
+            (fn, ex) = os.path.splitext(f.filename)
+            file_dir = os.path.join(os.getcwd(), 'files/'+name+'/'+fn + version)  #file/model1/model3
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
             if f:
@@ -81,6 +83,7 @@ def addModel():
                     (filename, extension) = os.path.splitext(tempfilename)
                     print((filename, extension))
                     file_path = os.path.join(path, filename)
+            #存到数据库中的，多个文件是文件夹路径，单个文件就是该文件路径
             fid = getFile(file_path,name)
             new_model = Model(project=pid, name=name, type=type, description=des,
                           version=version, file=fid, create_time=dt, update_time=dt,state=0)
@@ -198,11 +201,13 @@ def viewModel(model_id):
     return render_template('model.html', user=flask_login.current_user, model_info=info)
 
 
-@model_bp.route('/upFile/', methods=['GET', 'POST'])#测试文件上传
+@model_bp.route('/upFile/', methods=['GET', 'POST'])#测试文件上传和路径
 def upFile():
     f = request.files['file']
-
-    file_dir = os.path.join(os.getcwd(), 'files')
+    name = request.form['name']
+    version  = request.form['version']
+    (fn, ex) = os.path.splitext(f.filename)
+    file_dir = os.path.join(os.getcwd(), 'files/'+name+'/'+version+fn)
 
     if not os.path.exists(file_dir):
         os.makedirs(file_dir)
