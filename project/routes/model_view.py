@@ -60,8 +60,8 @@ def addModel():
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(name)
-            (fn, ex) = os.path.splitext(f.filename)
-            file_dir = os.path.join(os.getcwd(), 'files/'+name+'/'+fn + version)  #file/model1/model3
+
+            file_dir = os.path.join(os.getcwd(), 'files/'+pid+'/'+name+'_'+version)  #files/5/model_1/  files/项目id/模型名称_版本号/文件名称版本号
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
             if f:
@@ -206,8 +206,9 @@ def upFile():
     f = request.files['file']
     name = request.form['name']
     version  = request.form['version']
-    (fn, ex) = os.path.splitext(f.filename)
-    file_dir = os.path.join(os.getcwd(), 'files/'+name+'/'+version+fn)
+    pid = request.form['pid']
+
+    file_dir = os.path.join(os.getcwd(), 'files/' + pid + '/' + name + '_' + version)
 
     if not os.path.exists(file_dir):
         os.makedirs(file_dir)
@@ -218,18 +219,19 @@ def upFile():
         print(file_path)
         print(allowed_file(f.filename))
         print(f.filename.endswith('.txt'))
-        zip_file = zipfile.ZipFile(file_path)
-        zip_list = zip_file.namelist()  # 得到压缩包里所有文件
+        if(f.filename.endswith('.zip')):
+            zip_file = zipfile.ZipFile(file_path)
+            zip_list = zip_file.namelist()  # 得到压缩包里所有文件
 
-        for f in zip_list:
-            zip_file.extract(f, file_dir)  # 循环解压文件到指定目录
+            for f in zip_list:
+                zip_file.extract(f, file_dir)  # 循环解压文件到指定目录
 
-        zip_file.close()  # 关闭文件，必须有，释放内存
-        (filepath, tempfilename) = os.path.split(file_path)
-        print(file_path)
-        (filename, extension) = os.path.splitext(tempfilename)
-        print((filename, extension))
-        file_path = os.path.join(filepath,filename)
+            zip_file.close()  # 关闭文件，必须有，释放内存
+            (filepath, tempfilename) = os.path.split(file_path)
+            print(file_path)
+            (filename, extension) = os.path.splitext(tempfilename)
+            print((filename, extension))
+            file_path = os.path.join(filepath, filename)
         print(file_path)
     res = {}
     return res
