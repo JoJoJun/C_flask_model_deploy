@@ -54,6 +54,9 @@ def addModel():
         if (len(type) == 0 or len(name) == 0 or len(version)==0 or len(pid)==0):
             res['code'] = '100x'
             res['msg'] = '参数数据缺失'
+        elif not f:
+            res['code'] = '100x'
+            res['msg'] = '文件丢失'
         elif not allowed_file(f.filename):
             res['code'] = '100x'
             res['msg'] = '文件格式错误'
@@ -83,7 +86,7 @@ def addModel():
                     (filename, extension) = os.path.splitext(tempfilename)
                     print((filename, extension))
                     file_path = os.path.join(path, filename)
-            writeConfig(file_dir, file_path,type)
+                    writeConfig(file_dir, file_path,type)
             #file_path多个文件是文件夹路径，单个文件就是该文件路径
             configFile = os.path.join(file_dir,'config.yml')
             fid = getFile(configFile,name)#还是存配置文件地址吧
