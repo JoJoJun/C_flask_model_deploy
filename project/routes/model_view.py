@@ -56,12 +56,12 @@ def addModel():
             res['msg'] = '参数数据缺失'
         elif not allowed_file(f.filename):
             res['code'] = '100x'
-            res['msg'] = '文件格式错误'  #还少文件夹解压
+            res['msg'] = '文件格式错误'
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(name)
 
-            file_dir = os.path.join(os.getcwd(), 'files/'+pid+'/'+name+'_'+version)  #files/5/model_1/  files/项目id/模型名称_版本号/文件名称版本号
+            file_dir = os.path.join(os.getcwd(), 'files/'+pid+'/'+name+'_'+version)  #files/5/model_1  （files/项目id/模型名称_版本号
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
             if f:
@@ -83,8 +83,10 @@ def addModel():
                     (filename, extension) = os.path.splitext(tempfilename)
                     print((filename, extension))
                     file_path = os.path.join(path, filename)
-            #存到数据库中的，多个文件是文件夹路径，单个文件就是该文件路径
-            fid = getFile(file_path,name)
+            writeConfig(file_dir, file_path,type)
+            #file_path多个文件是文件夹路径，单个文件就是该文件路径
+            configFile = os.path.join(file_dir,'config.yml')
+            fid = getFile(configFile,name)#还是存配置文件地址吧
             new_model = Model(project=pid, name=name, type=type, description=des,
                           version=version, file=fid, create_time=dt, update_time=dt,state=0)
             db.session.add(new_model)
@@ -200,13 +202,14 @@ def viewModel(model_id):
     print(info)
     return render_template('model.html', user=flask_login.current_user, model_info=info)
 
-
-@model_bp.route('/upFile/', methods=['GET', 'POST'])#测试文件上传和路径
+'''
+@model_bp.route('/upFile/', methods=['GET', 'POST'])#测试文件上传和路径,生成配置文件
 def upFile():
     f = request.files['file']
     name = request.form['name']
     version  = request.form['version']
     pid = request.form['pid']
+    type = request.form['type']
 
     file_dir = os.path.join(os.getcwd(), 'files/' + pid + '/' + name + '_' + version)
 
@@ -233,5 +236,60 @@ def upFile():
             print((filename, extension))
             file_path = os.path.join(filepath, filename)
         print(file_path)
+        writeConfig(file_dir,file_path,type)
     res = {}
     return res
+'''
+def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(到模型名_版本号，file_path多个文件到文件夹，无后缀名，单个文件到文件，有后缀名
+
+    #file_path两个单文件类型可以直接存，有文件夹的还需要再找
+    #file_dir+config.yml是配置文件所在路径
+    yaml_path = os.path.join(file_dir, 'config.yml')
+    if type =='H5' or type == 'PB':#无文件夹
+        data = {
+            'CURRENT_MODEL_TYPE': type,
+            type : {'model_path': file_path}
+        }
+    elif type == 'TXT':  # 找.txt
+        # 此时file_path是文件夹
+        model_graph_file_path = ''
+        for file in os.listdir(file_path):
+            if os.path.splitext(file)[1] == '.txt':
+                model_graph_file_path = os.path.join(file_path,file)
+
+        data = {
+            'CURRENT_MODEL_TYPE': type,
+            type: {'model_path': file_path, 'model_graph_file_path': model_graph_file_path}
+        }
+    elif type == 'CPKT':#找.meta
+        #此时file_path是文件夹
+        model_graph_file_path = ''
+        for file in os.listdir(file_path):
+            if os.path.splitext(file)[1] == '.meta':
+                model_graph_file_path = os.path.join(file_path,file)
+        data = {
+            'CURRENT_MODEL_TYPE': type,
+            type: {'model_path': file_path,'model_graph_file_path':model_graph_file_path}
+        }
+    else:#TORCH 找 .pt .py文件
+        model_path = ''
+        model_graph_file_path = ''
+        for file in os.listdir(file_path):
+            if os.path.splitext(file)[1] == '.pt':
+                model_path = os.path.join(file_path,file)
+        for file in os.listdir(file_path):
+            if os.path.splitext(file)[1] == '.py':
+                model_graph_file_path = os.path.join(file_path,file)
+        data = {
+            'CURRENT_MODEL_TYPE': type,
+            type: {'model_path': model_path, 'model_graph_file_path': model_graph_file_path}
+        }
+    # 写入到yaml文件
+    with open(yaml_path, "w", encoding="utf-8") as f:
+        yaml.dump(data, f)
+        f = open(yaml_path)
+        x = yaml.load(f)
+        print(x)
+
+
+
