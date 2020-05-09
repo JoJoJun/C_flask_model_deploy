@@ -27,7 +27,7 @@ def checkVersion():#检查版本
         name = request.form['name']
 
         if (len(pid) == 0 or len(name) == 0):
-            res['code'] = '100x'
+            res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
             version = getVersion(pid, name) + 1
@@ -35,7 +35,7 @@ def checkVersion():#检查版本
             res['msg'] = '查询成功'
             res['data'] = version
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
@@ -52,13 +52,13 @@ def addModel():
         f = request.files['file']
         pid = request.form['project_id']
         if (len(type) == 0 or len(name) == 0 or len(version)==0 or len(pid)==0):
-            res['code'] = '100x'
+            res['code'] = 1005
             res['msg'] = '参数数据缺失'
         elif not f:
-            res['code'] = '100x'
+            res['code'] = 2016
             res['msg'] = '文件丢失'
         elif not allowed_file(f.filename):
-            res['code'] = '100x'
+            res['code'] = 2017
             res['msg'] = '文件格式错误'
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -99,10 +99,10 @@ def addModel():
                 res['code'] = 1000
                 res['msg'] = '创建成功'
             else:
-                res['code'] = 1004
+                res['code'] = 1003
                 res['msg'] = '创建失败'
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
@@ -115,7 +115,7 @@ def deleteModel():
     try:
         id = request.form['model_id']
         if (len(id) == 0):
-            res['code'] = '100x'
+            res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
             flag = delete_model(id)
@@ -126,7 +126,7 @@ def deleteModel():
                 res['code'] = 1004
                 res['msg'] = '删除失败'
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
@@ -141,17 +141,17 @@ def editParam():
         cpu = request.form['cpu']
         memory = request.form['memory']
         if (len(id) == 0 or len(RTenvironment) ==0 or len(cpu)==0 or len(memory)==0):
-            res['code'] = '100x'
+            res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
             flag = findRecord(id)
             print(flag)
             if flag:   #已经有了，修改
                 if edit_param(id,RTenvironment,cpu,memory):
-                    res['code'] = '1000'
+                    res['code'] = 1000
                     res['msg'] = '操作成功'
                 else:
-                    res['code'] = '1004'
+                    res['code'] = 1006
                     res['msg'] = '修改失败'
             else:   #还没有，新增
                 dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -161,13 +161,13 @@ def editParam():
                 db.session.add(new_Record)
                 db.session.commit()
                 if findRecord(id):
-                    res['code'] = '1000'
+                    res['code'] = 1000
                     res['msg'] = '操作成功'
                 else:
-                    res['code'] = '1004'
-                    res['msg'] = '添加失败'
+                    res['code'] = 1003
+                    res['msg'] = '导入模型失败'
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
@@ -248,9 +248,14 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
     #file_path两个单文件类型可以直接存，有文件夹的还需要再找
     #file_dir+config.yml是配置文件所在路径
     yaml_path = os.path.join(file_dir, 'config.yml')
-    if type =='H5' or type == 'PB':#无文件夹
+    if type =='KERAS':#无文件夹
         data = {
-            'CURRENT_MODEL_TYPE': type,
+            'CURRENT_MODEL_TYPE': 'H5',
+            type : {'model_path': file_path}
+        }
+    elif type == '参数固化':#无文件夹
+        data = {
+            'CURRENT_MODEL_TYPE': 'PB',
             type : {'model_path': file_path}
         }
     elif type == 'TXT':  # 找.txt
@@ -271,20 +276,20 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
             if os.path.splitext(file)[1] == '.meta':
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
-            'CURRENT_MODEL_TYPE': type,
+            'CURRENT_MODEL_TYPE': 'CPKT',
             type: {'model_path': file_path,'model_graph_file_path':model_graph_file_path}
         }
-    else:#TORCH 找 .pt .py文件
+    else:#PYTORCH 找 .pt .py文件
         model_path = ''
         model_graph_file_path = ''
         for file in os.listdir(file_path):
-            if os.path.splitext(file)[1] == '.pt':
+            if os.path.splitext(file)[1] == '.pt' or os.path.splitext(file)[1] == '.pth':
                 model_path = os.path.join(file_path,file)
         for file in os.listdir(file_path):
             if os.path.splitext(file)[1] == '.py':
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
-            'CURRENT_MODEL_TYPE': type,
+            'CURRENT_MODEL_TYPE': 'TORCH',
             type: {'model_path': model_path, 'model_graph_file_path': model_graph_file_path}
         }
     # 写入到yaml文件
