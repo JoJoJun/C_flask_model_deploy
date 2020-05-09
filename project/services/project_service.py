@@ -14,6 +14,7 @@ def list_all_project():
         d['create_time'] = str(l.create_time)
         d['update_time'] = str(l.update_time)
         d['id'] = l.id
+        d['description']=l.description
         data.append(d)
     print(data)
     return data
