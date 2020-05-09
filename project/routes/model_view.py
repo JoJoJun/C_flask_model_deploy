@@ -5,7 +5,7 @@ import os
 import yaml
 import zipfile
 from project.models.model import Model,Record
-from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id
+from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id,get_model_type,get_config_file_path
 from project.services.record_service import get_record_detail_by_model
 from project.models import db
 model_bp = Blueprint('model', __name__, url_prefix='/model')
@@ -130,34 +130,50 @@ def deleteModel():
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
-@model_bp.route('/editParam/', methods=['GET', 'POST'])#设置参数
-def editParam():
+@model_bp.route('/editParam/<model_id>', methods=['GET', 'POST'])#设置参数   是不是直接写文件就可以？
+def editParam(model_id):
     if request.method == 'GET':
-        return render_template('create_model.html', user=flask_login.current_user)
+        #查找表单信息并返回
+        record = db.session.query(Record).filter_by(model = model_id).first()
+        res={}
+        res['memory'] = record.memory
+        res['input'] = record.input
+        res['output'] = record.output
+        return render_template('model_parm.html', user=flask_login.current_user,res = res)
     res = {}
     try:
-        id = request.form['model_id']
-        RTenvironment = request.form['RTenvironment']
-        cpu = request.form['cpu']
-        memory = request.form['memory']
-        if (len(id) == 0 or len(RTenvironment) ==0 or len(cpu)==0 or len(memory)==0):
-            res['code'] = 1005
-            res['msg'] = '参数数据缺失'
+        record  = Record.query.filter_by(model = model_id).first()
+
+        if record.state == '1':
+            print('cccccccc')
+            res['code'] = 2019
+            res['msg'] = '模型已部署，不能修改参数'
         else:
-            flag = findRecord(id)
+            print('hhhhhhhhhhhh')
+            type = get_model_type(model_id)
+            file_path = get_config_file_path(model_id)
+            if type == 'CPKT' or type == 'PB':
+                input = request.form['input']
+                output = request.form['output']
+                memory = request.form['memory']
+                # 编辑config.yml文件
+                editConfig(input,output,memory,file_path)
+            else:
+                memory = request.form['memory']
+                # 编辑config.yml文件
+                editConfig('', '', memory,file_path)
+            flag = findRecord(model_id)
             print(flag)
-            if flag:   #已经有了，修改
-                if edit_param(id,RTenvironment,cpu,memory):
+            if flag:  # 已经有了，修改
+                if edit_param(model_id, memory,input,output):
                     res['code'] = 1000
                     res['msg'] = '操作成功'
                 else:
                     res['code'] = 1006
                     res['msg'] = '修改失败'
-            else:   #还没有，新增
-                dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                new_Record = Record(model=id, RTenvironment=RTenvironment, cpu=cpu, url='/url',memory=memory,
-                                   state = 0,load=0,create_time=dt)
-                print(dt)
+            else:  # 还没有，新增
+                new_Record = Record(model=model_id, memory=memory,input = input,output=output,
+                                    state='0')
                 db.session.add(new_Record)
                 db.session.commit()
                 if findRecord(id):
@@ -166,6 +182,7 @@ def editParam():
                 else:
                     res['code'] = 1003
                     res['msg'] = '导入模型失败'
+
     except:
         res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
@@ -248,15 +265,19 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
     #file_path两个单文件类型可以直接存，有文件夹的还需要再找
     #file_dir+config.yml是配置文件所在路径
     yaml_path = os.path.join(file_dir, 'config.yml')
-    if type =='KERAS':#无文件夹
+    if type =='H5':#无文件夹
         data = {
             'CURRENT_MODEL_TYPE': 'H5',
-            type : {'model_path': file_path}
+            'H5' : {'model_path': file_path}
         }
-    elif type == '参数固化':#无文件夹
+    elif type == 'PB':#无文件夹
         data = {
             'CURRENT_MODEL_TYPE': 'PB',
-            type : {'model_path': file_path}
+            'PB' : {'model_path': file_path,
+                    'input_node_name': '',
+                    'output_node_name': '',
+                    'mem_limit': 0
+                    }
         }
     elif type == 'TXT':  # 找.txt
         # 此时file_path是文件夹
@@ -267,7 +288,7 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
 
         data = {
             'CURRENT_MODEL_TYPE': type,
-            type: {'model_path': file_path, 'model_graph_file_path': model_graph_file_path}
+            type: {'model_path': file_path, 'model_graph_file_path': model_graph_file_path,'cc':'hhhhhhhhhhh'}
         }
     elif type == 'CPKT':#找.meta
         #此时file_path是文件夹
@@ -277,7 +298,11 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
             'CURRENT_MODEL_TYPE': 'CPKT',
-            type: {'model_path': file_path,'model_graph_file_path':model_graph_file_path}
+            'CPKT': {'model_path': file_path,
+                     'model_graph_file_path':model_graph_file_path,
+                     'input_node_name':'',
+                     'output_node_name':'',
+                     'mem_limit':0}
         }
     else:#PYTORCH 找 .pt .py文件
         model_path = ''
@@ -290,7 +315,7 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
             'CURRENT_MODEL_TYPE': 'TORCH',
-            type: {'model_path': model_path, 'model_graph_file_path': model_graph_file_path}
+            'TORCH': {'model_path': model_path, 'model_graph_file_path': model_graph_file_path}
         }
     # 写入到yaml文件
     with open(yaml_path, "w", encoding="utf-8") as f:
@@ -298,6 +323,11 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
         f = open(yaml_path)
         x = yaml.load(f)
         print(x)
+def editConfig(input_node_name,output_node_name,mem_limit,file_path):  #修改配置文件参数
+    return 0
 
-
-
+#返回表单。通过get方法 √
+#加一个判断，是否在运行中，看能不能改参数 √
+#生成文件有两个模型有输入输出节点,添加内存参数 √
+#editParam改接收数据，预留内存也改文件，要修改文件，不是在新建中 预留内存、输入输出节点，需要根据类型判断
+#key  port  input output四个参数
