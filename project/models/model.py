@@ -86,12 +86,13 @@ class Record(Base):
     memory = Column(Float)
     # load = Column(Integer, nullable=False, server_default=FetchedValue())
     create_time = Column(DateTime)
+    # state: 0未部署  1运行中  2 暂停中
     state = Column(String(255), info='鏄?惁鍦ㄩ儴缃茬姸鎬')
-
     input = Column(String(255), nullable=False)
     output = Column(String(255), nullable=False)
     key = Column(String(255), nullable=False)
     port = Column(Integer)
+
     model1 = relationship('Model', primaryjoin='Record.model == Model.id', backref='records')
 
 

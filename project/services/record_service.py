@@ -15,3 +15,14 @@ def get_Record_State(id):#True代表
     flag = False
 
     return flag
+
+# 判断是否已经暂停
+def get_record_state(record_id):
+    record = Record.query.filter_by(id = record_id).first()
+    state = record.state
+    state = int(state)
+    return state
+
+# 由record_id返回record
+def get_record_by_id(record_id):
+    return Record.query.filter_by(id = record_id).first()
