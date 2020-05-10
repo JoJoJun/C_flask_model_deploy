@@ -81,13 +81,17 @@ class Record(Base):
     id = Column(BigInteger, primary_key=True)
     model = Column(ForeignKey('model.id'), nullable=False, index=True)
     url = Column(String(255), nullable=False)
-    RTenvironment = Column(String(255))
-    cpu = Column(Float)
+    # RTenvironment = Column(String(255))
+    # cpu = Column(Float)
     memory = Column(Float)
-    load = Column(Integer, nullable=False, server_default=FetchedValue())
+    # load = Column(Integer, nullable=False, server_default=FetchedValue())
     create_time = Column(DateTime)
     state = Column(String(255), info='鏄?惁鍦ㄩ儴缃茬姸鎬')
 
+    input = Column(String(255), nullable=False)
+    output = Column(String(255), nullable=False)
+    key = Column(String(255), nullable=False)
+    port = Column(Integer)
     model1 = relationship('Model', primaryjoin='Record.model == Model.id', backref='records')
 
 

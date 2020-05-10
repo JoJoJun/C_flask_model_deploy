@@ -5,5 +5,4 @@ from datetime import datetime
 def get_record_detail_by_model(model_id):
     print(model_id)
     record = Record.query.filter_by(model=model_id).first()
-
     return record
