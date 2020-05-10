@@ -363,8 +363,4 @@ def editConfig(input_node_name,output_node_name,mem_limit,file_path,type):  #修
                 yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
     return 0
 
-#返回表单。通过get方法 √
-#加一个判断，是否在运行中，看能不能改参数 √
-#生成文件有两个模型有输入输出节点,添加内存参数 √
-#editParam改接收数据，预留内存也改文件，要修改文件，不是在新建中 预留内存、输入输出节点，需要根据类型判断
-#key  port  input output四个参数 √
+

@@ -7,3 +7,11 @@ def get_record_detail_by_model(model_id):
     record = Record.query.filter_by(model=model_id).first()
 
     return record
+def countStat(id):
+    count = 0
+    return count
+
+def get_Record_State(id):#True代表
+    flag = False
+
+    return flag
