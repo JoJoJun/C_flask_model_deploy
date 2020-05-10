@@ -3,9 +3,10 @@ import flask_login
 import datetime
 import os
 import yaml
+import ruamel.yaml
 import zipfile
 from project.models.model import Model,Record
-from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id
+from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id,get_model_type,get_config_file_path
 from project.services.record_service import get_record_detail_by_model
 from project.models import db
 model_bp = Blueprint('model', __name__, url_prefix='/model')
@@ -19,15 +20,13 @@ def allowed_file(file):
 
 @model_bp.route('/checkVersion/',methods=['GET', 'POST'])
 def checkVersion():#检查版本
-    if request.method == 'GET':
-        return render_template('create_model.html', user=flask_login.current_user)
     res = {}
     try:
         pid = request.form['pid']
         name = request.form['name']
 
         if (len(pid) == 0 or len(name) == 0):
-            res['code'] = '100x'
+            res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
             version = getVersion(pid, name) + 1
@@ -35,7 +34,7 @@ def checkVersion():#检查版本
             res['msg'] = '查询成功'
             res['data'] = version
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
@@ -52,13 +51,13 @@ def addModel():
         f = request.files['file']
         pid = request.form['project_id']
         if (len(type) == 0 or len(name) == 0 or len(version)==0 or len(pid)==0):
-            res['code'] = '100x'
+            res['code'] = 1005
             res['msg'] = '参数数据缺失'
         elif not f:
-            res['code'] = '100x'
+            res['code'] = 2016
             res['msg'] = '文件丢失'
         elif not allowed_file(f.filename):
-            res['code'] = '100x'
+            res['code'] = 2017
             res['msg'] = '文件格式错误'
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -99,75 +98,98 @@ def addModel():
                 res['code'] = 1000
                 res['msg'] = '创建成功'
             else:
-                res['code'] = 1004
+                res['code'] = 1003
                 res['msg'] = '创建失败'
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
 
 @model_bp.route('/deleteModel/', methods=['GET', 'POST'])#删除模型
 def deleteModel():
-    if request.method == 'GET':
-        return render_template('create_model.html', user=flask_login.current_user)
     res = {}
     try:
         id = request.form['model_id']
+        record = Record.query.filter_by(model=id).first()
+
         if (len(id) == 0):
-            res['code'] = '100x'
+            res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
-            flag = delete_model(id)
-            if flag:
-                res['code'] = 1000
-                res['msg'] = '删除成功'
+            if record.state == '1':
+                print('cccccccc')
+                res['code'] = 2013
+                res['msg'] = '实例正在运行，无法删除实例'
             else:
-                res['code'] = 1004
-                res['msg'] = '删除失败'
+                flag = delete_model(id)
+                if flag:
+                    res['code'] = 1000
+                    res['msg'] = '删除成功'
+                else:
+                    res['code'] = 1004
+                    res['msg'] = '删除失败'
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
-@model_bp.route('/editParam/', methods=['GET', 'POST'])#设置参数
-def editParam():
+@model_bp.route('/editParam/<model_id>', methods=['GET', 'POST'])#设置参数   是不是直接写文件就可以？
+def editParam(model_id):
     if request.method == 'GET':
-        return render_template('create_model.html', user=flask_login.current_user)
+        #查找表单信息并返回
+        record = db.session.query(Record).filter_by(model = model_id).first()
+        res={}
+        res['memory'] = record.memory
+        res['input'] = record.input
+        res['output'] = record.output
+        return render_template('model_parm.html', user=flask_login.current_user,res = res)
     res = {}
     try:
-        id = request.form['model_id']
-        RTenvironment = request.form['RTenvironment']
-        cpu = request.form['cpu']
-        memory = request.form['memory']
-        if (len(id) == 0 or len(RTenvironment) ==0 or len(cpu)==0 or len(memory)==0):
-            res['code'] = '100x'
-            res['msg'] = '参数数据缺失'
+        record  = Record.query.filter_by(model = model_id).first()
+
+        if record.state == '1':
+            print('cccccccc')
+            res['code'] = 2019
+            res['msg'] = '模型已部署，不能修改参数'
         else:
-            flag = findRecord(id)
+            print('hhhhhhhhhhhh')
+            type = get_model_type(model_id)
+            file_path = get_config_file_path(model_id)
+            if type == 'CPKT' or type == 'PB':
+                input = request.form['input']
+                output = request.form['output']
+                memory = request.form['memory']
+                # 编辑config.yml文件
+            else:
+                memory = request.form['memory']
+                input = ''
+                output = ''
+                # 编辑config.yml文件
+            editConfig(input, output, memory, file_path,type)
+            flag = findRecord(model_id)
             print(flag)
-            if flag:   #已经有了，修改
-                if edit_param(id,RTenvironment,cpu,memory):
-                    res['code'] = '1000'
+            if flag:  # 已经有了，修改
+                if edit_param(model_id, memory,input,output):
+                    res['code'] = 1000
                     res['msg'] = '操作成功'
                 else:
-                    res['code'] = '1004'
+                    res['code'] = 1006
                     res['msg'] = '修改失败'
-            else:   #还没有，新增
-                dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                new_Record = Record(model=id, RTenvironment=RTenvironment, cpu=cpu, url='/url',memory=memory,
-                                   state = 0,load=0,create_time=dt)
-                print(dt)
+            else:  # 还没有，新增
+                new_Record = Record(model=model_id, memory=memory,input = input,output=output,
+                                    state='0')
                 db.session.add(new_Record)
                 db.session.commit()
                 if findRecord(id):
-                    res['code'] = '1000'
+                    res['code'] = 1000
                     res['msg'] = '操作成功'
                 else:
-                    res['code'] = '1004'
-                    res['msg'] = '添加失败'
+                    res['code'] = 1003
+                    res['msg'] = '导入模型失败'
+
     except:
-        res['code'] = '100x'
+        res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
@@ -248,10 +270,19 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
     #file_path两个单文件类型可以直接存，有文件夹的还需要再找
     #file_dir+config.yml是配置文件所在路径
     yaml_path = os.path.join(file_dir, 'config.yml')
-    if type =='H5' or type == 'PB':#无文件夹
+    if type =='H5':#无文件夹
         data = {
-            'CURRENT_MODEL_TYPE': type,
-            type : {'model_path': file_path}
+            'CURRENT_MODEL_TYPE': 'H5',
+            'H5' : {'model_path': file_path}
+        }
+    elif type == 'PB':#无文件夹
+        data = {
+            'CURRENT_MODEL_TYPE': 'PB',
+            'PB' : {'model_path': file_path,
+                    'input_node_name': '',
+                    'output_node_name': '',
+                    'mem_limit': 0
+                    }
         }
     elif type == 'TXT':  # 找.txt
         # 此时file_path是文件夹
@@ -262,7 +293,7 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
 
         data = {
             'CURRENT_MODEL_TYPE': type,
-            type: {'model_path': file_path, 'model_graph_file_path': model_graph_file_path}
+            type: {'model_path': file_path, 'model_graph_file_path': model_graph_file_path,'cc':'hhhhhhhhhhh'}
         }
     elif type == 'CPKT':#找.meta
         #此时file_path是文件夹
@@ -271,21 +302,25 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
             if os.path.splitext(file)[1] == '.meta':
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
-            'CURRENT_MODEL_TYPE': type,
-            type: {'model_path': file_path,'model_graph_file_path':model_graph_file_path}
+            'CURRENT_MODEL_TYPE': 'CPKT',
+            'CPKT': {'model_directory': file_path,
+                     'model_graph_file_path':model_graph_file_path,
+                     'input_node_name':'',
+                     'output_node_name':'',
+                     'mem_limit':0}
         }
-    else:#TORCH 找 .pt .py文件
+    else:#PYTORCH 找 .pt .py文件
         model_path = ''
         model_graph_file_path = ''
         for file in os.listdir(file_path):
-            if os.path.splitext(file)[1] == '.pt':
+            if os.path.splitext(file)[1] == '.pt' or os.path.splitext(file)[1] == '.pth':
                 model_path = os.path.join(file_path,file)
         for file in os.listdir(file_path):
             if os.path.splitext(file)[1] == '.py':
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
-            'CURRENT_MODEL_TYPE': type,
-            type: {'model_path': model_path, 'model_graph_file_path': model_graph_file_path}
+            'CURRENT_MODEL_TYPE': 'TORCH',
+            'TORCH': {'model_path': model_path, 'model_graph_file_path': model_graph_file_path}
         }
     # 写入到yaml文件
     with open(yaml_path, "w", encoding="utf-8") as f:
@@ -293,6 +328,39 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
         f = open(yaml_path)
         x = yaml.load(f)
         print(x)
+'''
+@model_bp.route('/editFile/', methods=['GET', 'POST']) #测试修改yml文件参数
+def editFIle():
+    input = request.form['input']
+    output = request.form['output']
+    memory = request.form['memory']
+    model_id = request.form['id']
+    type = 'PB'
+    # 编辑config.yml文件
+    res ={}
+    file_path = get_config_file_path(model_id)
+    editConfig(input, output, memory, file_path,type)
+    f = open(file_path, 'r', encoding='utf-8')
+    x = f.read()
+    print(x)
+    return x    
+'''
 
+def editConfig(input_node_name,output_node_name,mem_limit,file_path,type):  #修改配置文件参数
+    if type =='CPKT' or type == 'PB':#有input output name 参数
+        with open(file_path, encoding="utf-8") as f:
+            content = ruamel.yaml.safe_load(f)
+            content[type]['input_node_name'] = input_node_name
+            content[type]['output_node_name'] = output_node_name
+            content[type]['mem_limit'] = mem_limit
+            with open(file_path, 'w', encoding="utf-8") as nf:
+                yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
+    else:
+        with open(file_path, encoding="utf-8") as f:
+            content = ruamel.yaml.safe_load(f)
+            content[type]['mem_limit'] = mem_limit
+            with open(file_path, 'w', encoding="utf-8") as nf:
+                yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
+    return 0
 
 

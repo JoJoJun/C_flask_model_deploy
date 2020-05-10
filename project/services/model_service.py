@@ -36,25 +36,39 @@ def delete_model(id):
         return False
     else:
         return True
+#检查是否成功添加
 def findRecord(id):
     flag = False
     if db.session.query(Record).filter_by(model = id).first():
         flag = True
     return flag
-
-def edit_param(id,RTenvironment,cpu,memory):
+#检查修改参数是否成功
+def edit_param(id,memory,input,output):
     flag = False
     rec = db.session.query(Record).filter_by(model=id).first()
 
-    rec.RTenvironment = RTenvironment
-    rec.cpu = cpu
     rec.memory = memory
+    rec.input = input
+    rec.output = output
     db.session.commit()
 
-    if db.session.query(Record).filter_by(model = id,memory=memory,cpu=cpu,RTenvironment=RTenvironment).first():
+    if db.session.query(Record).filter_by(model = id,memory=memory,input=input,output=output).first():
         flag = True
     return flag
 
+#根据id找到config文件路径
+def get_config_file_path(id):
+    model = Model.query.filter_by(id=id).first()
+    id = model.file
+    file = File.query.filter_by(id=id).first()
+    path = file.path
+    return path
+
+#获取模型类别
+def get_model_type(id):
+    model = Model.query.filter_by(id = id).first()
+    type = model.type
+    return type
 # 由项目id模型列表
 def model_list(pro_id):
     list = Model.query.filter_by(state=0, project=pro_id).all()
