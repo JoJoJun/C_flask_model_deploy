@@ -3,6 +3,7 @@ import flask_login
 import datetime
 import os
 import yaml
+import ruamel.yaml
 import zipfile
 from project.models.model import Model,Record
 from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id,get_model_type,get_config_file_path
@@ -19,8 +20,6 @@ def allowed_file(file):
 
 @model_bp.route('/checkVersion/',methods=['GET', 'POST'])
 def checkVersion():#检查版本
-    if request.method == 'GET':
-        return render_template('create_model.html', user=flask_login.current_user)
     res = {}
     try:
         pid = request.form['pid']
@@ -109,22 +108,27 @@ def addModel():
 
 @model_bp.route('/deleteModel/', methods=['GET', 'POST'])#删除模型
 def deleteModel():
-    if request.method == 'GET':
-        return render_template('create_model.html', user=flask_login.current_user)
     res = {}
     try:
         id = request.form['model_id']
+        record = Record.query.filter_by(model=id).first()
+
         if (len(id) == 0):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
-            flag = delete_model(id)
-            if flag:
-                res['code'] = 1000
-                res['msg'] = '删除成功'
+            if record.state == '1':
+                print('cccccccc')
+                res['code'] = 2013
+                res['msg'] = '实例正在运行，无法删除实例'
             else:
-                res['code'] = 1004
-                res['msg'] = '删除失败'
+                flag = delete_model(id)
+                if flag:
+                    res['code'] = 1000
+                    res['msg'] = '删除成功'
+                else:
+                    res['code'] = 1004
+                    res['msg'] = '删除失败'
     except:
         res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
@@ -157,11 +161,12 @@ def editParam(model_id):
                 output = request.form['output']
                 memory = request.form['memory']
                 # 编辑config.yml文件
-                editConfig(input,output,memory,file_path)
             else:
                 memory = request.form['memory']
+                input = ''
+                output = ''
                 # 编辑config.yml文件
-                editConfig('', '', memory,file_path)
+            editConfig(input, output, memory, file_path,type)
             flag = findRecord(model_id)
             print(flag)
             if flag:  # 已经有了，修改
@@ -298,7 +303,7 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
             'CURRENT_MODEL_TYPE': 'CPKT',
-            'CPKT': {'model_path': file_path,
+            'CPKT': {'model_directory': file_path,
                      'model_graph_file_path':model_graph_file_path,
                      'input_node_name':'',
                      'output_node_name':'',
@@ -323,11 +328,43 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
         f = open(yaml_path)
         x = yaml.load(f)
         print(x)
-def editConfig(input_node_name,output_node_name,mem_limit,file_path):  #修改配置文件参数
+'''
+@model_bp.route('/editFile/', methods=['GET', 'POST']) #测试修改yml文件参数
+def editFIle():
+    input = request.form['input']
+    output = request.form['output']
+    memory = request.form['memory']
+    model_id = request.form['id']
+    type = 'PB'
+    # 编辑config.yml文件
+    res ={}
+    file_path = get_config_file_path(model_id)
+    editConfig(input, output, memory, file_path,type)
+    f = open(file_path, 'r', encoding='utf-8')
+    x = f.read()
+    print(x)
+    return x    
+'''
+
+def editConfig(input_node_name,output_node_name,mem_limit,file_path,type):  #修改配置文件参数
+    if type =='CPKT' or type == 'PB':#有input output name 参数
+        with open(file_path, encoding="utf-8") as f:
+            content = ruamel.yaml.safe_load(f)
+            content[type]['input_node_name'] = input_node_name
+            content[type]['output_node_name'] = output_node_name
+            content[type]['mem_limit'] = mem_limit
+            with open(file_path, 'w', encoding="utf-8") as nf:
+                yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
+    else:
+        with open(file_path, encoding="utf-8") as f:
+            content = ruamel.yaml.safe_load(f)
+            content[type]['mem_limit'] = mem_limit
+            with open(file_path, 'w', encoding="utf-8") as nf:
+                yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
     return 0
 
 #返回表单。通过get方法 √
 #加一个判断，是否在运行中，看能不能改参数 √
 #生成文件有两个模型有输入输出节点,添加内存参数 √
 #editParam改接收数据，预留内存也改文件，要修改文件，不是在新建中 预留内存、输入输出节点，需要根据类型判断
-#key  port  input output四个参数
+#key  port  input output四个参数 √
