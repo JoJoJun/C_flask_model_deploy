@@ -143,10 +143,12 @@ def editParam(model_id):
     if request.method == 'GET':
         #查找表单信息并返回
         record = db.session.query(Record).filter_by(model = model_id).first()
+        model = db.session.query(Model).filter_by(id = model_id).first()
         res={}
         res['memory'] = record.memory
         res['input'] = record.input
         res['output'] = record.output
+        res['type'] = model.type
         return render_template('model_parm.html', user=flask_login.current_user,res = res)
     res = {}
     try:
