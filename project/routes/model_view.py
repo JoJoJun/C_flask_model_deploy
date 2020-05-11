@@ -183,7 +183,7 @@ def editParam(model_id):
                     res['code'] = 1006
                     res['msg'] = '修改失败'
             else:  # 还没有，新增
-                new_Record = Record(model=model_id, memory=memory,input = input,output=output,
+                new_Record = Record(model=model_id, memory=memory,input = input,output=output,url='/url',
                                     state='0')
                 db.session.add(new_Record)
                 db.session.commit()

@@ -1,5 +1,3 @@
-from project.models.model import User
-from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 from project.models.model import User,Record
 from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 from project.models import db
@@ -7,47 +5,100 @@ import flask_login
 import datetime
 from project.services.record_service import get_record_detail_by_model,get_record_state,get_record_by_id
 record_bp = Blueprint('record', __name__, url_prefix='/record')
-from project.services.record_service import countStat,get_Record_State
+from project.services.record_service import countStat,get_Record_State,get_config_file_path,delete_record,edit_record
 
 @record_bp.route('/startModel/',methods=['GET', 'POST'])
 def startModel():#模型部署
     res = {}
     try:
-        id = request.form['model_id']
-        if (len(id) == 0):
+        model_id = request.form['model_id']
+        if (len(model_id) == 0):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
-            #先查部署的模型有没有超过10
-            count = countStat(id)
+            #检查实例是否存在
+            if not Record.query.filter_by(model=model_id).first():
+                #res['code'] = 2016
+                #res['msg'] = '实例不存在'
 
-            if count>=10:
+                create_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                new_record = Record(model=model_id, state = '0',url='/url',create_time = create_time)
+                db.session.add(new_record)
+                db.session.commit()
+
+            #先查部署的模型有没有超过10
+            data = countStat(model_id)
+
+            if data['count']>=10:
                 res['code'] = 2016
                 res['msg'] = '运行实例数达到上限'
-            elif get_Record_State(id):
+            elif get_Record_State(model_id)=='1':
                 res['code'] = 2015
                 res['msg'] = '该模型已经在运行状态'
             else:
-                model_setting_file_path = ''
-                user_pid_list = ''
-                program_pid_list = ''
-                code = deploy(id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
-                if code == '4033':
-                    res['code'] = 1003
+                model_setting_file_path = get_config_file_path(model_id)
+                user_pid_list = data['user_pid_list']
+                program_pid_list = data['program_pid_list']
+
+                print(program_pid_list)
+                print(user_pid_list)
+
+                #result = deploy(id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
+                result ='4033'
+                if result == '4033':
+                    res['code'] = 2011
                     res['msg'] = '部署失败'
                 else:
                     #获得pid port和url和时间，存到数据库
-                    res['code'] = 1000
-                    res['msg'] = '部署成功'
+                    port = result['pid']
+                    url = result['url']
+                    flag = edit_record(model_id,port,url)
+                    if flag:
+                        res['code'] = 1000
+                        res['msg'] = '部署成功'
+                        res['port'] = port
+                        res['url'] = url
+                    else:
+                        res['code'] = 2011
+                        res['msg'] = '部署失败'
     except:
         res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
-
-def deploy(id,model_setting_file_path,user_pid_list,program_pid_list):#模型部署
-    return '4033'
-
 #states，pid，url，key
+
+
+@record_bp.route('/deleteRecord/',methods=['GET', 'POST'])
+def deleteRecord():#删除实例
+    model_id = request.form['model_id']
+    res={}
+    if (len(model_id) == 0):
+        res['code'] = 1005
+        res['msg'] = '参数数据缺失'
+    elif not Record.query.filter_by(model=model_id).first():
+        res['code'] = 2020
+        res['msg'] = '实例不存在'
+    elif get_Record_State(model_id)=='1':
+        res['code'] = 2013
+        res['msg'] = '实例在运行状态，不能删除'
+    else:
+        #code = delete(model_id)
+        code = '4044'
+        if code =='4044':
+            flag = delete_record(model_id)
+            if flag:
+                res['code'] = 1000
+                res['msg'] = '删除成功'
+            else:
+                res['code'] = 1004
+                res['msg'] = '删除失败'
+        elif code =='4041':
+            res['code'] = 2020
+            res['msg'] = '服务器不存在该实例'
+        else:
+            res['code'] = 1004
+            res['msg'] = '删除实例失败'
+    return jsonify(res)
 
 
 # 暂停运行中实例
