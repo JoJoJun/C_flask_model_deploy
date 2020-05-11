@@ -96,6 +96,50 @@ def pauseModel():
         return jsonify(res)
 
 
+# 重启暂停后的实例
+@record_bp.route('/restartModel/',methods=['GET', 'POST'])
+def restartModel():
+    res = {}
+    model_id = request.form['model_id']
+    print('model_id',model_id)
+    record = get_record_detail_by_model(model_id)
+    # record = get_record_by_id(record_id)
+    # 判断查询是否成功
+    if not record:
+        code = 2012
+        msg = '服务未启动'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
+
+    port = record.port
+    record_id = record.id
+    state = get_record_state(record_id)
+    print(state, type(state))
+    # 判断实例状态
+    # 1 运行中
+    if state == 1:
+        res['code'] = 2015
+        res['msg'] = '实例已在运行状态'
+        return jsonify(res)
+    # 0 未部署
+    elif state == 0:
+        code = 2012
+        msg = '服务未启动'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
+    else:
+        # TODO 调用restart(record_id,port) 返回ans
+        ans = False
+        if ans:
+            res['code'] = 1000
+            res['msg'] = '实例恢复成功'
+        else:
+            res['code'] = 2000
+            res['msg'] = '实例恢复失败'
+        return jsonify(res)
+
 
 # 测试数据库修改
 @record_bp.route('/addtest/', methods=['GET', 'POST'])
