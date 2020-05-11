@@ -51,12 +51,14 @@ def deploy(id,model_setting_file_path,user_pid_list,program_pid_list):#模型部
 
 
 # 暂停运行中实例
-@record_bp.route('/pauseModel/<record_id>',methods=['GET','POST'])
-def pauseModel(record_id):
+@record_bp.route('/pauseModel/',methods=['GET','POST'])
+def pauseModel():
     res = {}
-    print(record_id)
-    # record = get_record_detail_by_model(model_id)
-    record = get_record_by_id(record_id)
+    model_id = request.form['model_id']
+    print(model_id)
+    record = get_record_detail_by_model(model_id)
+
+    # record = get_record_by_id(record_id)
     # 判断查询是否成功
     if not record:
         code = 2012
@@ -66,6 +68,7 @@ def pauseModel(record_id):
         return jsonify(res)
 
     port = record.port
+    record_id = record.id
     state = get_record_state(record_id)
     print(state,type(state))
     # 判断实例状态
