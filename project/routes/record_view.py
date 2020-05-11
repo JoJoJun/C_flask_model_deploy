@@ -33,7 +33,7 @@ def startModel():#模型部署
                 program_pid_list = ''
                 code = deploy(id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
                 if code == '4033':
-                    res['code'] = 1000
+                    res['code'] = 1003
                     res['msg'] = '部署失败'
                 else:
                     #获得pid port和url和时间，存到数据库

@@ -23,7 +23,7 @@ def getFile(url,name):
 
     db.session.add(new_file)
     db.session.commit()
-    fid = File.query.filter_by(path=url, name =name).first().id
+    fid = db.session.query(File).filter_by(path=url, name =name).first().id
     return fid
 
 #删除模型

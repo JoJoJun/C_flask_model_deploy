@@ -35,7 +35,7 @@ class Model(Base):
 
     id = Column(BigInteger, primary_key=True)
     name = Column(String(255), nullable=False)
-    type = Column(Integer, nullable=False)
+    type = Column(String(20), nullable=False)
     algorithm = Column(String(255))
     RTengine = Column(String(255))
     description = Column(String(255))

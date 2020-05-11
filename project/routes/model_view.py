@@ -50,7 +50,7 @@ def addModel():
         version = request.form['version']  # 需要再发一遍回来吧，确认用？
         f = request.files['file']
         pid = request.form['project_id']
-        if (len(type) == 0 or len(name) == 0 or len(version)==0 or len(pid)==0):
+        if (len(type) == 0 or len(name) == 0 or len(version) == 0 or len(pid) == 0):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
         elif not f:
@@ -63,14 +63,15 @@ def addModel():
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(name)
 
-            file_dir = os.path.join(os.getcwd(), 'files/'+pid+'/'+name+'_'+version)  #files/5/model_1  （files/项目id/模型名称_版本号
+            file_dir = os.path.join(os.getcwd(),
+                                    'files/' + pid + '/' + name + '_' + version)  # files/5/model_1  （files/项目id/模型名称_版本号
             if not os.path.exists(file_dir):
                 os.makedirs(file_dir)
             if f:
                 file_path = os.path.join(file_dir, f.filename)  # filename是f的固有属性
                 f.save(file_path)  # 保存到指定目录
 
-                if f.filename.endswith('.zip'):# 如果是zip文件，解压,并获取文件夹路径（没有后缀名
+                if f.filename.endswith('.zip'):  # 如果是zip文件，解压,并获取文件夹路径（没有后缀名
                     print(f.filename.endswith('.zip'))
 
                     zip_file = zipfile.ZipFile(file_path)
@@ -85,12 +86,14 @@ def addModel():
                     (filename, extension) = os.path.splitext(tempfilename)
                     print((filename, extension))
                     file_path = os.path.join(path, filename)
-                    writeConfig(file_dir, file_path,type)
-            #file_path多个文件是文件夹路径，单个文件就是该文件路径
-            configFile = os.path.join(file_dir,'config.yml')
-            fid = getFile(configFile,name)#还是存配置文件地址吧
+                    writeConfig(file_dir, file_path, type)
+            # file_path多个文件是文件夹路径，单个文件就是该文件路径
+            configFile = os.path.join(file_dir, 'config.yml')
+            fid = getFile(configFile, name)  # 还是存配置文件地址吧
+            print(fid)
+            print(pid)
             new_model = Model(project=pid, name=name, type=type, description=des,
-                          version=version, file=fid, create_time=dt, update_time=dt,state=0)
+                              version=version, create_time=dt, file=fid, state=0)
             db.session.add(new_model)
             db.session.commit()
             flag = checkAdd(pid, name, version)
@@ -104,6 +107,7 @@ def addModel():
         res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
+
 
 
 @model_bp.route('/deleteModel/', methods=['GET', 'POST'])#删除模型
@@ -363,4 +367,8 @@ def editConfig(input_node_name,output_node_name,mem_limit,file_path,type):  #修
                 yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
     return 0
 
-
+#返回表单。通过get方法 √
+#加一个判断，是否在运行中，看能不能改参数 √
+#生成文件有两个模型有输入输出节点,添加内存参数 √
+#editParam改接收数据，预留内存也改文件，要修改文件，不是在新建中 预留内存、输入输出节点，需要根据类型判断 √
+#key  port  input output四个参数 √
