@@ -17,15 +17,48 @@
     .page-header {
         margin-top: 0;
     }
+
     .project-basic-info div {
         padding-top: 0px;
     }
+
     .project-basic-info h3 {
         margin-top: 0px;
         font-size: 20px;
     }
+
     .project-basic-info p {
         margin-left: 10px;
+    }
+
+    .sp-circle {
+        display: none;
+        width: 32px;
+        height: 32px;
+        margin-right: 10px;
+        border: 4px rgba(0, 0, 0, 0.25) solid;
+        border-top: 4px black solid;
+        border-radius: 50%;
+        -webkit-animation: spCircRot .6s infinite linear;
+        animation: spCircRot .6s infinite linear;
+    }
+
+    @-webkit-keyframes spCircRot {
+        from {
+            -webkit-transform: rotate(0deg);
+        }
+        to {
+            -webkit-transform: rotate(359deg);
+        }
+    }
+
+    @keyframes spCircRot {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(359deg);
+        }
     }
 </style>
 {% endblock %}
@@ -103,9 +136,10 @@
             <div class="modal-body">
                 您确定删除<span id="mName" style="font-weight: bold"></span>吗？
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal" id="delete-yes">确定</button>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end;">
+                <div class="sp sp-circle" id="load"></div>
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="delete-no">取消</button>
+                <button type="button" class="btn btn-primary" id="delete-yes">确定</button>
             </div>
         </div>
     </div>
@@ -127,23 +161,38 @@
             type: "POST",
             data: {'model_id': current_model_id},
             dataType: 'json',
-            success:function(data){
-                console.log(data);
-                let obj = current_delete_btn.closest('tr');
-                obj.animate({opacity:0.0}, 800, 'swing', function(){
-                    $('#model-list').bootstrapTable('remove', {field: 'operation', values: current_model_id});
-                });
-                for(let i = 0; i < project_data['model_list'].length; i++){
-                    if(project_data['model_list'][i]['id'] == current_model_id){
-                        project_data['model_list'].splice(i, 1);
-                        break;
+            timeout: 10000,
+            beforeSend: function () {
+                $('#load').show();
+                $('#delete-yes').attr('disabled', true);
+            },
+            success: function (res) {
+                $('#load').hide();
+                $('#delete-yes').attr('disabled', false);
+                if (res['code'] == 1000) {
+                    $('#delete-no').click();
+                    let obj = current_delete_btn.closest('tr');
+                    obj.animate({opacity: 0.0}, 800, 'swing', function () {
+                        $('#model-list').bootstrapTable('remove', {field: 'operation', values: current_model_id});
+                    });
+                    for (let i = 0; i < project_data['model_list'].length; i++) {
+                        if (project_data['model_list'][i]['id'] == current_model_id) {
+                            project_data['model_list'].splice(i, 1);
+                            break;
+                        }
                     }
+                    $('span[class="badge"]').html(project_data['model_list'].length);
+                } else {
+                    alert(res['msg']);
                 }
-                $('span[class="badge"]').html(project_data['model_list'].length);
+            },
+            error: function () {
+                $('#load').hide();
+                $('#delete-yes').attr('disabled', false);
+                alert("请求超时，请重试。");
             }
         });
     });
-
     function load_basic_info(data) {
         let keys = ['name', 'url', 'create_time', 'update_time', 'model_count', 'description'];
         if (data['model_list'].length == 0) $('#model_count').css('color', 'grey');
@@ -164,7 +213,6 @@
             $('#' + key).text(text);
         }
     }
-
     function load_models_table(data) {
         let tableData = new Array();
         for (let i = 0; i < data.length; i++) {
@@ -223,7 +271,7 @@
         });
         // 设置参数按钮
         $(document).on('click', 'button[data-target="#edit-modal"]', function () {
-            window.location = "/model/parm/"+this.id.split('-')[1];
+            window.location = "/model/editParam/" + this.id.split('-')[1];
         });
         // 删除按钮
         $(document).on('click', 'button[data-target="#delete-confirm-modal"]', function () {

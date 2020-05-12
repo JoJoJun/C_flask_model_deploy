@@ -85,17 +85,17 @@
             type: "POST",
             data: upload_data,
             dataType: 'json',
-            beforeSend:function () {
+            timeout: 10000,
+            beforeSend: function () {
                 $('#loading').show();
             },
-            success:function(res){
+            success: function (res) {
                 $('#loading').hide();
                 console.log(res);
-                if(res['code'] == 1000) {
+                if (res['code'] == 1000) {
                     // alert('创建成功');
-                    window.location = '/project/view/'+res['msg'];
-                }
-                else {
+                    window.location = '/project/view/' + res['msg'];
+                } else {
                     // alert('创建失败');
                     if ([2004].indexOf(res['code']) != -1) {
                         let target_input = document.getElementById('project-name');
@@ -103,6 +103,10 @@
                         set_error_feedback(target_input, 'div.form-group', res['msg']);
                     }
                 }
+            },
+            error: function () {
+                $('#loading').hide();
+                alert("请求超时，请重试。");
             }
         });
     });

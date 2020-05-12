@@ -32,7 +32,6 @@
         color: darkred;
         font-size: smaller;
     }
-
     .sp-circle {
         display: none;
         width: 28px;
@@ -43,7 +42,6 @@
         -webkit-animation: spCircRot .6s infinite linear;
         animation: spCircRot .6s infinite linear;
     }
-
     @-webkit-keyframes spCircRot {
         from {
             -webkit-transform: rotate(0deg);
@@ -52,7 +50,6 @@
             -webkit-transform: rotate(359deg);
         }
     }
-
     @keyframes spCircRot {
         from {
             transform: rotate(0deg);
@@ -74,9 +71,14 @@
     <div class="form-group">
         <label class="required" for="model-type">类型</label>
         <select class="form-control selectpicker" data-live-search="true" id="model-type" title="选择：模型类型">
-            <option>深度学习模型1</option>
-            <option>深度学习模型2</option>
-            <option>深度学习模型3</option>
+            <option>CPKT</option>
+            <option>H5</option>
+            <option>PB</option>
+            <option>TORCH</option>
+            <!--option>cpkt</option>
+            <option>Keras(.h5)</option>
+            <option>参数固化(.pb)</option>
+            <option>pytorch(.pt或.pth)</option-->
         </select>
     </div>
     <div class="form-group">
@@ -126,28 +128,41 @@
     /** 文本框.change **/
     $("#model-name").change(function () {
         $.ajax({
+            url: "/model/checkVersion/",
             type: "POST",
-            data: {'flag': 0, 'name': document.getElementById('model-name').value},
+            data: {'name': document.getElementById('model-name').value},
             dataType: 'json',
+            timeout: 10000,
             beforeSend: function () {
                 $('#load').show();
+                let target_input = document.getElementById('model-version');
+                clear_error_feedback(target_input, 'div.form-group');
             },
-            success: function (data) {
+            success: function (res) {
                 $('#load').hide();
-                console.log(data);
-                let version = data['version'];
-                $('#model-version').val(version);
-                let remark;
-                let color;
-                if (version == '1.0') {
-                    remark = '(新的模型名称,版本号初始化为1.0)';
-                    color = '#3c763d';
+                console.log(res);
+                if (res['code'] == 1000) {
+                    let version = res['data'];
+                    $('#model-version').val(version);
+                    let remark;
+                    let color;
+                    if (version == '1.0') {
+                        remark = '(新的模型名称,版本号初始化为1.0)';
+                        color = '#3c763d';
+                    } else {
+                        remark = '(模型名称已存在,版本号递增至' + version + ')';
+                        color = '#8a6d3b';
+                    }
+                    $('#remark').html(remark);
+                    $('#remark').css('color', color);
                 } else {
-                    remark = '(模型名称已存在,版本号递增至' + version + ')';
-                    color = '#8a6d3b';
+                    let target_input = document.getElementById('model-version');
+                    set_error_feedback(target_input, 'div.form-group', res['msg']);
                 }
-                $('#remark').html(remark);
-                $('#remark').css('color', color);
+            },
+            error: function () {
+                $('#load').hide();
+                alert("查询版本号超时，请重试。");
             }
         });
     });
@@ -175,7 +190,7 @@
             clear_error_feedback(type, 'div.form-group');
             error_msg = '请选择模型类型';
             set_error_feedback(type, 'div.form-group', error_msg);
-            return ;
+            return;
         }
         // 检查 模型文件
         let file = document.getElementById('model-file');
@@ -207,7 +222,7 @@
             beforeSend:function () {
                 $('#loading').show();
             },
-            success:function(data){
+            success:function(data) {
                 $('#loading').hide();
                 if (data['code'] == 1000) {
                     window.location = '/model/view/' + data['msg'];

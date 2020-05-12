@@ -29,7 +29,7 @@
 
     div.form-inline div.radio.radio-no {
         margin-left: 5%;
-        width: 15%;
+        width: 20%;
     }
 
     div.form-inline div.input-group {
@@ -41,45 +41,28 @@
 {% block content_head %} 设置部署参数 {% endblock %}
 {% block content_inner %}
 <form style="width: 60%">
+
     <!--div class="form-group">
-        <label class="required" for="model-version">模型版本</label>
-        <select class="form-control selectpicker" data-live-search="true" id="model-version" title="选择：模型版本">
-            <option>1.0</option>
-            <option>2.0</option>
-            <option>3.0</option>
+        <label class="required" for="model-env">网络服务运行环境</label>
+        <select class="form-control selectpicker" data-live-search="true" id="model-env" title="选择：网络服务运行环境">
+            <option>TensorFlow</option>
+            <option>Pytorch</option>
         </select>
     </div-->
 
     <div class="form-group">
-        <label class="required" for="model-env">网络服务运行环境</label>
-        <select class="form-control selectpicker" data-live-search="true" id="model-env" title="选择：网络服务运行环境">
-            <option>环境1</option>
-            <option>环境2</option>
-            <option>环境3</option>
-        </select>
+        <label class="required" for="model-type">模型类型</label>
+        <input type="text" class="form-control" id="model-type" required readonly>
     </div>
 
     <div class="form-group">
-        <label class="required" for="model-env">预留CPU</label>
-        <div class="form-inline">
-            <div class="radio radio-no">
-                <label>
-                    <input type="radio" name="cpu" id="cpu-no" value="no" checked>
-                    不需要
-                </label>
-            </div>
-            <div class="radio radio-yes">
-                <label>
-                    <input type="radio" name="cpu" id="cpu-yes" value="yes">
-                    需要，填写CPU个数：
-                </label>
-            </div>
-            <div class="input-group">
-                <input type="text" class="form-control" id="model-cpu" placeholder="请填写预留CPU个数"
-                       oninput="value=value.replace(/[^\d]/g,'')" disabled required>
-                <span class="input-group-addon">个</span>
-            </div>
-        </div>
+        <label class="required" for="model-in-node">输入节点</label>
+        <input type="text" class="form-control" id="model-in-node" placeholder="必填：输入节点" required>
+    </div>
+
+    <div class="form-group">
+        <label class="required" for="model-out-node">输出节点</label>
+        <input type="text" class="form-control" id="model-out-node" placeholder="必填：输出节点" required>
     </div>
 
     <div class="form-group">
@@ -88,13 +71,13 @@
             <div class="radio radio-no">
                 <label>
                     <input type="radio" name="mem" id="mem-no" value="no" checked>
-                    不需要
+                    使用默认内存
                 </label>
             </div>
             <div class="radio radio-yes">
                 <label>
                     <input type="radio" name="mem" id="mem-yes" value="yes">
-                    需要，填写内存大小：
+                    自定义内存大小：
                 </label>
             </div>
             <div class="input-group">
@@ -120,11 +103,26 @@
 <script>
     let nav_list = ['首页', '项目', '查看项目', '查看模型', '设置部署参数'];
     let href_list = ['/project/', '/project/', '#', '#'];
+    let res = {
+    {
+        res | safe
+    }
+    }
+    ;
     $(function () {
         load_nav(nav_list, href_list);
+        $('#model-type').val(res['type']);
+        $('#model-in-node').val(res['input']);
+        $('#model-out-node').val(res['output']);
+        $('#model-mem').val(res['memory']);
+        if (res['type'] != 'CPKT' && res['type'] != 'PB') {
+            $('#model-in-node').closest('div.form-group').remove();
+            $('#model-out-node').closest('div.form-group').remove();
+        }
+        button_disable_or_not();
     });
     /** 单选框.change **/
-    $('input[name=cpu], input[name=mem]').change(function () {
+    $('input[name=mem]').change(function () {
         if (this.value == 'yes') {
             $(this.closest('div.form-inline').querySelector('input[type=text]')).attr('disabled', false);
         } else if (this.value == 'no') {
@@ -134,8 +132,20 @@
         }
         button_disable_or_not();
     });
+    /** 文本框.blur **/
+    $("#model-in-node, #model-out-node").blur(function () {
+        // 先清空所有的span元素
+        clear_error_feedback(this, 'div.form-group');
+        // 校验
+        let value = $(this).val().trim();
+        if (value == "") {
+            let error_msg = "不可为空";
+            set_error_feedback(this, 'div.form-group', error_msg);
+        }
+        button_disable_or_not();
+    });
     /** 选择框and文本框.change **/
-    $('#model-env, #model-cpu, #model-mem').on('change', function () {
+    $('#model-in-node, #model-out-node, #model-mem').on('change', function () {
         clear_error_feedback(this, 'div.form-group');
         button_disable_or_not();
     });
@@ -143,51 +153,49 @@
         window.history.back(-1);
     });
     $('.create').click(function () {
-        // 检查 网络服务运行环境
-        let env = document.getElementById('model-env');
-        if (env.value == '') {
-            clear_error_feedback(env, 'div.form-group');
-            error_msg = '请选择网络服务运行环境';
-            set_error_feedback(env, 'div.form-group', error_msg);
-            return;
-        }
         // 开始传递表单内容
-        let cpu = $('input[name=cpu][id=cpu-yes]')[0].checked;
-        let cpu_input = document.getElementById('model-cpu');
         let mem = $('input[name=mem][id=mem-yes]')[0].checked;
-        let mem_input = document.getElementById('model-cpu');
+        let memory = document.getElementById('model-mem').value;
+        let input = '', output = '';
+        if (['CPKT', 'PB'].indexOf(res['type']) != -1) {
+            input = document.getElementById('model-in-node').value;
+            output = document.getElementById('model-out-node').value;
+        }
+
         let upload_data = new FormData();
-        // upload_data.append('version', version.value);
-        upload_data.append('env', env.value);
-        upload_data.append('cpu', cpu);
         upload_data.append('mem', mem);
-        if (cpu) upload_data.append('cpu_value', cpu_input.value);
-        if (mem) upload_data.append('mem_value', mem_input.value);
+        if (mem) upload_data.append('memory', memory);
+        upload_data.append('input', input);
+        upload_data.append('output', output);
         $.ajax({
             type: "POST",
             data: upload_data,
             dataType: 'json',
             processData: false,  //tell jQuery not to process the data
             contentType: false,  //tell jQuery not to set contentType
+            timeout: 10000,
             beforeSend: function () {
                 $('#loading').show();
             },
-            success: function (data) {
+            success: function (res) {
                 $('#loading').hide();
-                if (data['code'] == 1000) {
-                    // window.location = '/model/view/'+data['msg'];
-                    alert('部署参数设置成功');
+                if (res['code'] == 1000) {
+                    let id = location.href.split('/').pop();
+                    location.href = '/model/view/' + id;
                 } else {
-                    alert('部署参数设置失败');
+                    alert(res['msg']);
                 }
+            },
+            error: function () {
+                $('#loading').hide();
+                alert("请求超时，请重试。");
             }
         });
     });
 
     /** 确定按钮 disable or not **/
     function button_disable_or_not() {
-        if ($('#model-env').val().trim() == ''
-            || ($('input[name=cpu]')[1].checked == true && $('#model-cpu').val().trim() == '')
+        if ((['CPKT', 'PB'].indexOf(res['type']) != -1 && ($('#model-in-node').val().trim() == '' || $('#model-out-node').val().trim() == ''))
             || ($('input[name=mem]')[1].checked == true && $('#model-mem').val().trim() == ''))
             $('.create').attr('disabled', true);
         else
