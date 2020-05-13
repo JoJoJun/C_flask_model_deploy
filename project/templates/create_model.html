@@ -124,6 +124,7 @@
             showPreview: false,
             showUpload: false
         });
+        $('.file-caption-name').attr('placeholder', '请上传模型文件');
     });
     /** 文本框.change **/
     $("#model-name").change(function () {
@@ -165,6 +166,20 @@
                 alert("查询版本号超时，请重试。");
             }
         });
+    });
+    $("#model-type").change(function () {
+        let value = $(this).val().trim();
+        if (value == 'CPKT') {
+            $('.file-caption-name').attr('placeholder', '请将四类模型文件和模型图定义文件.meta打包为zip后上传');
+        } else if (value == 'H5') {
+            $('.file-caption-name').attr('placeholder', '请上传.h5格式文件');
+        } else if (value == 'PB') {
+            $('.file-caption-name').attr('placeholder', '请上传.pb格式文件');
+        } else if (value == 'TORCH') {
+            $('.file-caption-name').attr('placeholder', '请将模型文件.pt和模型图定义文件.py打包为zip后上传');
+        } else {
+            $('.file-caption-name').attr('placeholder', '模型类型错误');
+        }
     });
     /** 文本框.blur **/
     $("#model-name").blur(function () {
@@ -222,7 +237,7 @@
             beforeSend:function () {
                 $('#loading').show();
             },
-            success:function(data) {
+            success: function (data) {
                 $('#loading').hide();
                 if (data['code'] == 1000) {
                     window.location = '/model/view/' + data['msg'];

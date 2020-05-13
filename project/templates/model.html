@@ -22,15 +22,12 @@
         cursor: pointer;
         text-decoration: unset;
     }
-
     span.nothing {
         color: grey;
     }
-
     a.edit {
         cursor: pointer;
     }
-
     .sp-circle {
         display: none;
         width: 33px;
@@ -41,7 +38,6 @@
         -webkit-animation: spCircRot .6s infinite linear;
         animation: spCircRot .6s infinite linear;
     }
-
     @-webkit-keyframes spCircRot {
         from {
             -webkit-transform: rotate(0deg);
@@ -50,7 +46,6 @@
             -webkit-transform: rotate(359deg);
         }
     }
-
     @keyframes spCircRot {
         from {
             transform: rotate(0deg);
@@ -152,7 +147,6 @@
         let id = location.href.split('/').pop();
         location.href = '/model/editParam/' + id;
     });
-
     function load_basic_info(data) {
         let value_list = $('#basic_info table td.value');
         value_list[0].innerText = data['name'];
