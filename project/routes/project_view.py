@@ -42,6 +42,7 @@ def addPro():
       msg='新建项目成功'
       res['code']=code
       res['msg']=msg
+      res['id']=db.session.query(Project).filter_by(name=name,user=user_account).first().id
       # return redirect(url_for('project.project_view'))
       return jsonify(res)
    # res['code']=code

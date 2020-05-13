@@ -107,4 +107,5 @@ def register():
 @login_bp.route('/logout/')
 def logout():
     flask_login.logout_user()
-    return 'Logged out'
+#    return 'Logged out'
+    return render_template('login.html', user=None)
