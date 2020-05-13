@@ -36,7 +36,7 @@ def delete_model(id):
         return False
     else:
         return True
-#检查是否成功添加
+#检查是否有这个实例
 def findRecord(id):
     flag = False
     if db.session.query(Record).filter_by(model = id).first():

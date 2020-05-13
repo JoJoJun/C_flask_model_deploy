@@ -152,13 +152,19 @@ def editParam(model_id):
         return render_template('model_parm.html', user=flask_login.current_user,res = res)
     res = {}
     try:
-        record  = Record.query.filter_by(model = model_id).first()
-
-        if record.state == '1':
-            print('cccccccc')
-            res['code'] = 2019
-            res['msg'] = '模型已部署，不能修改参数'
+        flag = findRecord(model_id)
+        if flag:
+            record  = Record.query.filter_by(model = model_id).first()
+            if record.state == '1':
+                print('cccccccc')
+                res['code'] = 2019
+                res['msg'] = '模型已部署，不能修改参数'
+            return jsonify(res)
         else:
+            new_Record = Record(model=model_id,url='/url',state='0')
+            db.session.add(new_Record)
+            db.session.commit()
+
             print('hhhhhhhhhhhh')
             type = get_model_type(model_id)
             file_path = get_config_file_path(model_id)
@@ -173,7 +179,7 @@ def editParam(model_id):
                 output = ''
                 # 编辑config.yml文件
             editConfig(input, output, memory, file_path,type)
-            flag = findRecord(model_id)
+
             print(flag)
             if flag:  # 已经有了，修改
                 if edit_param(model_id, memory,input,output):
@@ -369,8 +375,4 @@ def editConfig(input_node_name,output_node_name,mem_limit,file_path,type):  #修
                 yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
     return 0
 
-#返回表单。通过get方法 √
-#加一个判断，是否在运行中，看能不能改参数 √
-#生成文件有两个模型有输入输出节点,添加内存参数 √
-#editParam改接收数据，预留内存也改文件，要修改文件，不是在新建中 预留内存、输入输出节点，需要根据类型判断 √
-#key  port  input output四个参数 √
+
