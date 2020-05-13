@@ -10,7 +10,7 @@ def list_all_project():
     for l in list:
         d = {}
         d['name'] = l.name
-        d['route'] = l.route
+        d['url'] = l.route
         d['create_time'] = str(l.create_time)
         d['update_time'] = str(l.update_time)
         d['id'] = l.id
