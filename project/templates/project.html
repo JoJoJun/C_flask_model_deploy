@@ -111,10 +111,18 @@
     <span class="badge">{{ project_info.model_list | length }}</span>
 </div>
 <div id="toolbar">
-    <a href="/model/addModel"><button class="btn btn-default" id="create_model">
-        <i class="fa fa-plus-circle" aria-hidden="true"></i>
-        &nbsp;导入模型
-    </button></a>
+    <a id="addmodel">
+        <button class="btn btn-default" id="create_model">
+            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+            &nbsp;导入模型
+        </button>
+    </a>
+    <script>
+        $('#addmodel').click(function () {
+            let pid = location.href.split('/').pop();
+            location.href = '/model/addModel/' + pid;
+        });
+    </script>
 </div>
 <table id="model-list" class="table table-striped table-bordered table-hover" style="display: table;"></table>
 <!-- 模态框 删除 -->
