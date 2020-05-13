@@ -223,17 +223,27 @@ def viewModel(model_id):
     basic['file']=list['file']
     basic['description']=list['description']
     if record:
-        deploy['env']= record.RTenvironment
-        deploy['cpu']=record.cpu
-        deploy['mem']=record.memory
-        deploy['url']=record.url
+        # deploy['env']= record.RTenvironment
+        # deploy['cpu']=record.cpu
+        deploy['record_id'] = record.id
+        deploy['mem']=record.memory if record.memory else ''
+        deploy['url']=record.url if record.url else ''
         deploy['state']=record.state
+        deploy['input'] = record.input if record.input else ''
+        deploy['output'] = record.output if record.output else ''
+        deploy['key'] = record.key if record.key else ''
+        deploy['port'] = record.port if record.port else ''
     else:
-        deploy['env']=''
-        deploy['cpu']=''
+        # deploy['env']=''
+        # deploy['cpu']=''
+        deploy['record_id'] = ''
         deploy['mem']=''
         deploy['url']=''
         deploy['state']=0
+        deploy['input'] =""
+        deploy['output'] = ""
+        deploy['key'] = ""
+        deploy['port'] = ""
     info['basic']=basic
     info['deploy']=deploy
     print(info)
