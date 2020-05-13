@@ -94,7 +94,7 @@
                 console.log(res);
                 if (res['code'] == 1000) {
                     // alert('创建成功');
-                    window.location = '/project/view/' + res['msg'];
+                    window.location = '/project/view/' + res['id'];
                 } else {
                     // alert('创建失败');
                     if ([2004].indexOf(res['code']) != -1) {
