@@ -78,3 +78,12 @@ def list_all_model(project_id):
         data.append(d)
     print(data)
     return data
+
+#检查是否跟其他项目重名
+def check_name(new_name, user_account,id):
+    project = Project.query.filter_by(id=id).first()
+    if new_name == project.name:
+        return False
+    elif check_project_same_name(new_name,user_account):
+        return True
+    return False
