@@ -25,7 +25,7 @@ def checkVersion():#检查版本
     try:
         #pid = request.form['pid']
         data = json.loads(request.form.get('data'))
-        pid = data['id']
+        pid = data['pid']
         name = request.form['name']
 
         if (len(pid) == 0 or len(name) == 0):
