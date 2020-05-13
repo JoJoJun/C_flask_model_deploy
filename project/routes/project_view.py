@@ -1,7 +1,7 @@
 from project.models.model import User,Project
 from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 
-from project.services.project_service import list_all_project, check_project_same_name,goDeletePro,edit_Pro,get_detail_byid
+from project.services.project_service import list_all_project, check_project_same_name,goDeletePro,edit_Pro,get_detail_byid,check_name
 import flask_login
 import datetime
 from project.models import db
@@ -42,6 +42,7 @@ def addPro():
       msg='新建项目成功'
       res['code']=code
       res['msg']=msg
+      res['id']=db.session.query(Project).filter_by(name=name,user=user_account).first().id
       # return redirect(url_for('project.project_view'))
       return jsonify(res)
    # res['code']=code
@@ -58,10 +59,11 @@ def editPro():
    name = request.form['name']
    url = request.form['url']
    des = request.form['description']
+
    res = {}
-#   user_account = flask_login.current_user.account
-   user_account = '123@123.com'
-   if check_project_same_name(name, user_account):
+   user_account = flask_login.current_user.account
+#   user_account = '123@123.com'
+   if check_name(name, user_account,id):
        code = 2004
        msg = '用户名下已存在同名项目'
        res['code'] = code
@@ -69,6 +71,7 @@ def editPro():
        return render_template('index.html', user=flask_login.current_user, res=res)
    else:
 #       Project.query.filter_by(id=id).update({'name': name,'route':url,'description':des})
+       print('ccccccccc')
        flag = edit_Pro(id,name,url,des)
        if flag:
             res['code'] = 1000

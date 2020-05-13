@@ -5,6 +5,7 @@ import os
 import yaml
 import ruamel.yaml
 import zipfile
+import json
 from project.models.model import Model,Record
 from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id,get_model_type,get_config_file_path
 from project.services.record_service import get_record_detail_by_model
@@ -22,7 +23,9 @@ def allowed_file(file):
 def checkVersion():#检查版本
     res = {}
     try:
-        pid = request.form['pid']
+        #pid = request.form['pid']
+        data = json.loads(request.form.get('data'))
+        pid = data['pid']
         name = request.form['name']
 
         if (len(pid) == 0 or len(name) == 0):
@@ -38,8 +41,8 @@ def checkVersion():#检查版本
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
 
-@model_bp.route('/addModel/', methods=['GET', 'POST'])#导入模型
-def addModel():
+@model_bp.route('/addModel/<pid>', methods=['GET', 'POST'])#导入模型
+def addModel(pid):
     if request.method == 'GET':
         return render_template('create_model.html', user=flask_login.current_user)
     res = {}
@@ -49,7 +52,6 @@ def addModel():
         des = request.form['description']
         version = request.form['version']  # 需要再发一遍回来吧，确认用？
         f = request.files['file']
-        pid = request.form['project_id']
         if (len(type) == 0 or len(name) == 0 or len(version) == 0 or len(pid) == 0):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
@@ -86,7 +88,7 @@ def addModel():
                     (filename, extension) = os.path.splitext(tempfilename)
                     print((filename, extension))
                     file_path = os.path.join(path, filename)
-                    writeConfig(file_dir, file_path, type)
+                writeConfig(file_dir, file_path, type)
             # file_path多个文件是文件夹路径，单个文件就是该文件路径
             configFile = os.path.join(file_dir, 'config.yml')
             fid = getFile(configFile, name)  # 还是存配置文件地址吧
@@ -109,19 +111,17 @@ def addModel():
     return jsonify(res)
 
 
-
 @model_bp.route('/deleteModel/', methods=['GET', 'POST'])#删除模型
 def deleteModel():
     res = {}
     try:
         id = request.form['model_id']
-        record = Record.query.filter_by(model=id).first()
 
         if (len(id) == 0):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
-            if record.state == '1':
+            if Record.query.filter_by(model=id).first() and Record.query.filter_by(model=id).first().state == '1':
                 print('cccccccc')
                 res['code'] = 2013
                 res['msg'] = '实例正在运行，无法删除实例'
@@ -142,12 +142,28 @@ def deleteModel():
 def editParam(model_id):
     if request.method == 'GET':
         #查找表单信息并返回
-        record = db.session.query(Record).filter_by(model = model_id).first()
-        model = db.session.query(Model).filter_by(id = model_id).first()
-        res={}
-        res['memory'] = record.memory
-        res['input'] = record.input
-        res['output'] = record.output
+        res = {}
+        model = db.session.query(Model).filter_by(id=model_id).first()
+        if db.session.query(Record).filter_by(model = model_id).first():
+            record = db.session.query(Record).filter_by(model=model_id).first()
+            if record.memory==None:
+                res['memory'] = ''
+            else:
+                res['memory'] = record.memory
+            if record.input==None:
+                res['input'] = ''
+            else:
+                res['input'] = record.input
+            if record.output==None:
+                res['output'] = ''
+            else:
+                res['output'] = record.output
+
+            print(res)
+        else:
+            res['memory'] = ''
+            res['input'] = ''
+            res['output'] = ''
         res['type'] = model.type
         return render_template('model_parm.html', user=flask_login.current_user,res = res)
     res = {}
@@ -223,17 +239,27 @@ def viewModel(model_id):
     basic['file']=list['file']
     basic['description']=list['description']
     if record:
-        deploy['env']= record.RTenvironment
-        deploy['cpu']=record.cpu
-        deploy['mem']=record.memory
-        deploy['url']=record.url
+        # deploy['env']= record.RTenvironment
+        # deploy['cpu']=record.cpu
+        deploy['record_id'] = record.id
+        deploy['mem']=record.memory if record.memory else ''
+        deploy['url']=record.url if record.url else ''
         deploy['state']=record.state
+        deploy['input'] = record.input if record.input else ''
+        deploy['output'] = record.output if record.output else ''
+        deploy['key'] = record.key if record.key else ''
+        deploy['port'] = record.port if record.port else ''
     else:
-        deploy['env']=''
-        deploy['cpu']=''
+        # deploy['env']=''
+        # deploy['cpu']=''
+        deploy['record_id'] = ''
         deploy['mem']=''
         deploy['url']=''
         deploy['state']=0
+        deploy['input'] =""
+        deploy['output'] = ""
+        deploy['key'] = ""
+        deploy['port'] = ""
     info['basic']=basic
     info['deploy']=deploy
     print(info)

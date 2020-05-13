@@ -17,18 +17,19 @@ def startModel():#模型部署
             res['msg'] = '参数数据缺失'
         else:
             #检查实例是否存在
+
             if not Record.query.filter_by(model=model_id).first():
                 #res['code'] = 2016
                 #res['msg'] = '实例不存在'
-
                 create_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 new_record = Record(model=model_id, state = '0',url='/url',create_time = create_time)
                 db.session.add(new_record)
                 db.session.commit()
 
             #先查部署的模型有没有超过10
-            data = countStat(model_id)
 
+            data = countStat(model_id)
+            print('hhhhhhhhhhh')
             if data['count']>=10:
                 res['code'] = 2016
                 res['msg'] = '运行实例数达到上限'

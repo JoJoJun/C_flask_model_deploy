@@ -78,13 +78,28 @@ def model_list(pro_id):
         d['name'] = l.name
         d['type'] = l.type
         d['create_time'] = str(l.create_time)
-        d['update_time'] = str(l.update_time)
+        if l.update_time:
+            d['update_time'] = str(l.update_time)
+        else:
+            d['update_time'] = ''
         d['id'] = l.id
-        d['algorithm']=l.algorithm
-        d['RTengine']=l.RTengine
-        d['description']=l.description
+        if l.algorithm:
+            d['algorithm']=l.algorithm
+        else:
+            d['algorithm'] =''
+        if l.RTengine:
+            d['RTengine']=l.RTengine
+        else:
+            d['RTengine'] =''
+        if l.description:
+            d['description']=l.description
+        else:
+            d['description'] =''
         d['version']=l.version
-        d['assessment']=l.assessment
+        if l.assessment:
+            d['assessment']=l.assessment
+        else:
+            d['assessment'] =''
         # d['file']=l.file
         # d['project']=l.project
         data.append(d)

@@ -21,6 +21,7 @@ def edit_record(model_id,port,url):
 
     record.url = url
     record.port = port
+    record.state = '1'
     db.session.commit()
     if db.session.query(Record).filter_by(port = port).first():
         flag = True
@@ -41,8 +42,8 @@ def countStat(model_id):
     for m in models:
         program_pid_list.append(m.id)
 
-    #user_account = flask_login.current_user.account
-    user_account = '123@123.com'
+    user_account = flask_login.current_user.account
+    #user_account = '123@123.com'
     print(user_account)
     projects = Project.query.filter_by(user=user_account).all()
     user_pid_list = []
