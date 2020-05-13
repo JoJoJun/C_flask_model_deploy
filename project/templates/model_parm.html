@@ -103,12 +103,7 @@
 <script>
     let nav_list = ['首页', '项目', '查看项目', '查看模型', '设置部署参数'];
     let href_list = ['/project/', '/project/', '#', '#'];
-    let res = {
-    {
-        res | safe
-    }
-    }
-    ;
+    let res = {{res | safe}};
     $(function () {
         load_nav(nav_list, href_list);
         $('#model-type').val(res['type']);
