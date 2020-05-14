@@ -79,7 +79,7 @@ class Record(Base):
     __tablename__ = 'record'
 
     id = Column(BigInteger, primary_key=True)
-    model = Column(ForeignKey('model.id'), nullable=False, index=True)
+    model = Column(ForeignKey('model.id',ondelete='CASCADE'),  index=True)
     url = Column(String(255), nullable=False)
     # RTenvironment = Column(String(255))
     # cpu = Column(Float)

@@ -117,7 +117,7 @@ def deleteModel():
     res = {}
     try:
         id = request.form['model_id']
-
+        print(id)
         if (len(id) == 0):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
@@ -127,6 +127,7 @@ def deleteModel():
                 res['code'] = 2013
                 res['msg'] = '实例正在运行，无法删除实例'
             else:
+                print('delete')
                 flag = delete_model(id)
                 if flag:
                     res['code'] = 1000
@@ -138,6 +139,7 @@ def deleteModel():
         res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
     return jsonify(res)
+
 
 @model_bp.route('/editParam/<model_id>', methods=['GET', 'POST'])#设置参数   是不是直接写文件就可以？
 def editParam(model_id):

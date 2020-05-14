@@ -15,13 +15,14 @@ def get_record_id_by_model(model_id):
     return Record.query.filter_by(model=model_id).first()
 '''
 # 将port 和url存入数据库
-def edit_record(model_id,port,url):
+def edit_record(model_id,port,url,key):
     flag  = False
     record = db.session.query(Record).filter_by(model = model_id).first()
 
     record.url = url
     record.port = port
     record.state = '1'
+    record.key = key
     db.session.commit()
     if db.session.query(Record).filter_by(port = port).first():
         flag = True
@@ -32,11 +33,11 @@ def edit_record(model_id,port,url):
 def countStat(model_id):
     data = {}
     #先找project_id
-    model = Model.query.filter_by(id=model_id).first()
+    model = db.session.query(Model).filter_by(id=model_id).first()
     project_id = model.project
     print(project_id)
 
-    models = Model.query.filter_by(project=project_id).all()
+    models = db.session.query(Model).filter_by(project=project_id).all()
 
     program_pid_list = []
     for m in models:
