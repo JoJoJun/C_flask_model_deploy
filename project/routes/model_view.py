@@ -5,7 +5,6 @@ import os
 import yaml
 import ruamel.yaml
 import zipfile
-import json
 from project.models.model import Model,Record
 from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id,get_model_type,get_config_file_path
 from project.services.record_service import get_record_detail_by_model
@@ -23,11 +22,11 @@ def allowed_file(file):
 def checkVersion():#检查版本
     res = {}
     try:
-        #pid = request.form['pid']
-        data = json.loads(request.form.get('data'))
-        pid = data['pid']
-        name = data['name']
-
+        print('ccccccccc')
+        pid = request.form.get('pid')
+        name = request.form.get('name')
+        print(pid)
+        print(name)
         if (len(pid) == 0 or len(name) == 0):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
@@ -100,8 +99,10 @@ def addModel(pid):
             db.session.commit()
             flag = checkAdd(pid, name, version)
             if flag:
+                model = db.session.query(Model).filter_by(name=name,project = pid,version=version).first()
                 res['code'] = 1000
                 res['msg'] = '创建成功'
+                res['id'] = model.id
             else:
                 res['code'] = 1003
                 res['msg'] = '创建失败'
@@ -169,52 +170,53 @@ def editParam(model_id):
     res = {}
     try:
         flag = findRecord(model_id)
+        print(flag)
         if flag:
             record  = Record.query.filter_by(model = model_id).first()
             if record.state == '1':
                 print('cccccccc')
                 res['code'] = 2019
                 res['msg'] = '模型已部署，不能修改参数'
-            return jsonify(res)
+                return jsonify(res)
         else:
-            new_Record = Record(model=model_id,url='/url',state='0')
+            print('xinzen1')
+            new_Record = Record(model=model_id, url='/url', state='0')
             db.session.add(new_Record)
             db.session.commit()
+            flag = True
 
-            print('hhhhhhhhhhhh')
-            type = get_model_type(model_id)
-            file_path = get_config_file_path(model_id)
-            if type == 'CPKT' or type == 'PB':
-                input = request.form['input']
-                output = request.form['output']
+        print('hhhhhhhhhhhh')
+        type = get_model_type(model_id)
+        file_path = get_config_file_path(model_id)
+
+        if type == 'CPKT' or type == 'PB':
+            print('pb')
+            input = request.form['input']
+            output = request.form['output']
+            mem = request.form['mem']
+            if mem == 'true':
                 memory = request.form['memory']
-                # 编辑config.yml文件
             else:
+                memory = 0
+            # 编辑config.yml文件
+        else:
+            mem = request.form['mem']
+            if mem == 'true':
                 memory = request.form['memory']
-                input = ''
-                output = ''
-                # 编辑config.yml文件
-            editConfig(input, output, memory, file_path,type)
+            else:
+                memory = 0
+            input = ''
+            output = ''
+            # 编辑config.yml文件
+        editConfig(input, output, memory, file_path, type)
 
-            print(flag)
-            if flag:  # 已经有了，修改
-                if edit_param(model_id, memory,input,output):
-                    res['code'] = 1000
-                    res['msg'] = '操作成功'
-                else:
-                    res['code'] = 1006
-                    res['msg'] = '修改失败'
-            else:  # 还没有，新增
-                new_Record = Record(model=model_id, memory=memory,input = input,output=output,url='/url',
-                                    state='0')
-                db.session.add(new_Record)
-                db.session.commit()
-                if findRecord(id):
-                    res['code'] = 1000
-                    res['msg'] = '操作成功'
-                else:
-                    res['code'] = 1003
-                    res['msg'] = '导入模型失败'
+        print(flag)
+        if edit_param(model_id, memory, input, output):
+            res['code'] = 1000
+            res['msg'] = '操作成功'
+        else:
+            res['code'] = 1006
+            res['msg'] = '修改失败'
 
     except:
         res['code'] = 2000
@@ -238,6 +240,7 @@ def viewModel(model_id):
     basic['version']=list['version']
     basic['file']=list['file']
     basic['description']=list['description']
+    basic['pid'] = list['project']
     if record:
         # deploy['env']= record.RTenvironment
         # deploy['cpu']=record.cpu
