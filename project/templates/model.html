@@ -127,12 +127,7 @@
 </div>
 
 <script>
-    let model_data = {
-    {
-        model_info | safe
-    }
-    }
-    ;
+    let model_data = {{ model_info | safe }};
     let nav_list = ['首页', '项目', '查看项目', '查看模型'];
     let href_list = ['/project/', '/project/', '/project/view/' + model_data['basic']['pid']];
     $(function () {
