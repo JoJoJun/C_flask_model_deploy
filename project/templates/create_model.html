@@ -243,10 +243,10 @@
             success: function (data) {
                 $('#loading').hide();
                 if (data['code'] == 1000) {
-                    window.location = '/model/view/' + data['msg'];
+                    window.location = '/model/view/' + data['id'];
                     // alert('导入成功');
                 } else {
-                    alert('导入失败');
+                    alert(data['msg']);
                 }
             }
         });
