@@ -45,11 +45,11 @@
 </div>
 <p id='res' style="display: none">{{ res }}</p>
 <script>
-	let target = $('#res');
-	let res = eval('(' + target[0].innerText + ')');
-	if ([2016, 2017].indexOf(res['code']) != -1) {	// 用户名不存在 & 密码或用户名有误
-		show_error_msg(1, res['msg']);
-	}
-	target.remove();
+    let target = $('#res');
+    let res = eval('(' + target[0].innerText + ')');
+    if ([2016, 2017].indexOf(res['code']) != -1) {	// 用户名不存在 & 密码或用户名有误
+        show_error_msg(1, res['msg']);
+    }
+    target.remove();
 </script>
 {% endblock %}

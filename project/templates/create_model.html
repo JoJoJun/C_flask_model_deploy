@@ -128,10 +128,13 @@
     });
     /** 文本框.change **/
     $("#model-name").change(function () {
+        let upload_data = {};
+        upload_data['name'] = document.getElementById('model-name').value;
+        upload_data['pid'] = location.href.split('/').pop();
         $.ajax({
             url: "/model/checkVersion/",
             type: "POST",
-            data: {'name': document.getElementById('model-name').value},
+            data: upload_data,
             dataType: 'json',
             timeout: 10000,
             beforeSend: function () {
