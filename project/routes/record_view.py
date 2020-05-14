@@ -38,11 +38,10 @@ def startModel():#模型部署
                 res['msg'] = '该模型已经在运行状态'
             else:
                 model_setting_file_path = get_config_file_path(model_id)
+                print(model_setting_file_path)
                 user_pid_list = data['user_pid_list']
-                program_pid_list = data['program_pid_list']
-
-                print(program_pid_list)
                 print(user_pid_list)
+                program_pid_list = data['program_pid_list']
 
                 #result = deploy(id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
                 result ='4033'

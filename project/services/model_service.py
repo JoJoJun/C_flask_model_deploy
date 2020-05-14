@@ -28,10 +28,12 @@ def getFile(url,name):
 
 #删除模型
 def delete_model(id):
+    record = db.session.query(Record).filter_by(model=id).first()
+    db.session.delete(record)
+    db.session.commit()
     model = db.session.query(Model).filter_by(id=id).first()
     db.session.delete(model)
     db.session.commit()
-
     if db.session.query(Model).filter_by(id=id).first():
         return False
     else:
