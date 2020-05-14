@@ -123,6 +123,7 @@ def get_model_detail_by_id(model_id):
     d['description'] = l.description
     d['version'] = l.version
     d['assessment'] = l.assessment
+    d['project'] = l.project
     file = get_file_detail_by_id(l.file)
     d['file']=file['path']
     return d

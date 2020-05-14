@@ -240,6 +240,7 @@ def viewModel(model_id):
     basic['version']=list['version']
     basic['file']=list['file']
     basic['description']=list['description']
+    basic['pid'] = list['project']
     if record:
         # deploy['env']= record.RTenvironment
         # deploy['cpu']=record.cpu
