@@ -54,6 +54,8 @@ def edit_param(id,memory,input,output):
 
     if db.session.query(Record).filter_by(model = id,memory=memory,input=input,output=output).first():
         flag = True
+    print('cccc')
+    print(flag)
     return flag
 
 #根据id找到config文件路径
