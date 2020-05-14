@@ -6,6 +6,7 @@ import datetime
 from project.services.record_service import get_record_detail_by_model,get_record_state,get_record_by_id
 record_bp = Blueprint('record', __name__, url_prefix='/record')
 from project.services.record_service import countStat,get_Record_State,get_config_file_path,delete_record,edit_record
+from project.deployment.instance_impl import deploy,delete,pause,restart
 
 @record_bp.route('/startModel/',methods=['GET', 'POST'])
 def startModel():#模型部署
@@ -43,21 +44,24 @@ def startModel():#模型部署
                 print(user_pid_list)
                 program_pid_list = data['program_pid_list']
 
-                #result = deploy(id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
-                result ='4033'
-                if result == '4033':
+                result = deploy(model_id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
+                #result ='4033'
+                if result == 4031 or result == 4036 or result == 4033 or result == 4034 or result == 4038:
                     res['code'] = 2011
                     res['msg'] = '部署失败'
+
                 else:
                     #获得pid port和url和时间，存到数据库
                     port = result['pid']
                     url = result['url']
-                    flag = edit_record(model_id,port,url)
+                    key = result['key']
+                    flag = edit_record(model_id,port,url,key)
                     if flag:
                         res['code'] = 1000
                         res['msg'] = '部署成功'
                         res['port'] = port
                         res['url'] = url
+                        res['key'] = key
                     else:
                         res['code'] = 2011
                         res['msg'] = '部署失败'
@@ -82,9 +86,9 @@ def deleteRecord():#删除实例
         res['code'] = 2013
         res['msg'] = '实例在运行状态，不能删除'
     else:
-        #code = delete(model_id)
-        code = '4044'
-        if code =='4044':
+        code = delete(model_id)
+        #code = '4044'
+        if code == 4044:
             flag = delete_record(model_id)
             if flag:
                 res['code'] = 1000
@@ -92,7 +96,7 @@ def deleteRecord():#删除实例
             else:
                 res['code'] = 1004
                 res['msg'] = '删除失败'
-        elif code =='4041':
+        elif code == 4041:
             res['code'] = 2020
             res['msg'] = '服务器不存在该实例'
         else:

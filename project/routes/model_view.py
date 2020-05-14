@@ -115,33 +115,30 @@ def addModel(pid):
 @model_bp.route('/deleteModel/', methods=['GET', 'POST'])#删除模型
 def deleteModel():
     res = {}
-    print('hhhhhhhh')
-    id = request.form['model_id']
-    print(id)
-    if (len(id) == 0):
-        res['code'] = 1005
-        res['msg'] = '参数数据缺失'
-    else:
-        if Record.query.filter_by(model=id).first() and Record.query.filter_by(model=id).first().state == '1':
-            print('cccccccc')
-            res['code'] = 2013
-            res['msg'] = '实例正在运行，无法删除实例'
+    try:
+        id = request.form['model_id']
+        print(id)
+        if (len(id) == 0):
+            res['code'] = 1005
+            res['msg'] = '参数数据缺失'
         else:
-            print('delete')
-            flag = delete_model(id)
-            if flag:
-                res['code'] = 1000
-                res['msg'] = '删除成功'
+            if Record.query.filter_by(model=id).first() and Record.query.filter_by(model=id).first().state == '1':
+                print('cccccccc')
+                res['code'] = 2013
+                res['msg'] = '实例正在运行，无法删除实例'
             else:
-                res['code'] = 1004
-                res['msg'] = '删除失败'
-    return jsonify(res)
-'''    try:
-        
+                print('delete')
+                flag = delete_model(id)
+                if flag:
+                    res['code'] = 1000
+                    res['msg'] = '删除成功'
+                else:
+                    res['code'] = 1004
+                    res['msg'] = '删除失败'
     except:
         res['code'] = 2000
         res['msg'] = '服务器错误，请检查参数'
-        '''
+    return jsonify(res)
 
 
 @model_bp.route('/editParam/<model_id>', methods=['GET', 'POST'])#设置参数   是不是直接写文件就可以？

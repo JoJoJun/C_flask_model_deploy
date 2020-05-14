@@ -15,13 +15,14 @@ def get_record_id_by_model(model_id):
     return Record.query.filter_by(model=model_id).first()
 '''
 # 将port 和url存入数据库
-def edit_record(model_id,port,url):
+def edit_record(model_id,port,url,key):
     flag  = False
     record = db.session.query(Record).filter_by(model = model_id).first()
 
     record.url = url
     record.port = port
     record.state = '1'
+    record.key = key
     db.session.commit()
     if db.session.query(Record).filter_by(port = port).first():
         flag = True
