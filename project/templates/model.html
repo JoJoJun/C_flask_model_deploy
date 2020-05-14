@@ -102,15 +102,15 @@
                 <td class="value"></td>
             </tr>
             <tr>
-                <td class="field"><strong>预留CPU</strong></td>
-                <td class="value"></td>
-            </tr>
-            <tr>
                 <td class="field"><strong>预留内存</strong></td>
                 <td class="value"></td>
             </tr>
             <tr>
                 <td class="field"><strong>URL</strong></td>
+                <td class="value"></td>
+            </tr>
+            <tr>
+                <td class="field"><strong>KEY</strong></td>
                 <td class="value"></td>
             </tr>
             <tr>
@@ -148,8 +148,7 @@
         value_list[1].innerText = data['type'];
         value_list[2].innerText = data['version'];
         value_list[3].innerHTML = "<button class=\"download_file\">" +
-            "<i class=\"fa fa-download\" aria-hidden=\"true\"></i>&nbsp;" + data['file'] +
-            "</button>";
+            "<i class=\"fa fa-download\" aria-hidden=\"true\"></i>&nbsp;模型文件</button>";
         if (data['description'] == '') {
             value_list[4].innerHTML = "<span class='nothing'>暂无描述</span>";
         } else {
@@ -161,12 +160,13 @@
     }
     function load_deploy_info(data) {
         let value_list = $('#deploy_info table td.value');
-        value_list[0].innerHTML = data['env'] == '' ? "<span class='nothing'>未设置部署信息</span>" : data['env'];
-        value_list[1].innerHTML = data['cpu'] == '' ? "<span class='nothing'>未设置部署信息</span>" : data['cpu'];
-        value_list[2].innerHTML = data['mem'] == '' ? "<span class='nothing'>未设置部署信息</span>" : data['mem'];
-        value_list[3].innerHTML = data['url'] == '' ? "<span class='nothing'>未部署，不可用</span>" :
+        value_list[0].innerHTML = data['env'] == '' ? "<span class='nothing'>未设置部署信息</span>" : '' +
+            '<img style="width: 90px" src="https://img.alicdn.com/tfs/TB1Ly5oS3HqK1RjSZFPXXcwapXa-238-54.png" class="aliyun-logo-image">';
+        value_list[1].innerHTML = data['mem'] == '' ? "<span class='nothing'>未设置部署信息</span>" : data['mem'];
+        value_list[2].innerHTML = data['url'] == '' ? "<span class='nothing'>未部署，不可用</span>" :
             data['url'] + "<a class=\"clipboard\">&nbsp;" +
             "<i class=\"fa fa-clipboard\" aria-hidden=\"true\"></i>点击复制</a>";
+        value_list[3].innerHTML = data['key'] == '' ? "<span class='nothing'>未设置，不可用</span>" : data['key'];
         if (parseInt(data['state']) == 0) {
             if (data['env'] == '') {
                 value_list[4].innerHTML = '未部署';
