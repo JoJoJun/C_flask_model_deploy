@@ -26,7 +26,7 @@ def checkVersion():#检查版本
         #pid = request.form['pid']
         data = json.loads(request.form.get('data'))
         pid = data['pid']
-        name = request.form['name']
+        name = data['name']
 
         if (len(pid) == 0 or len(name) == 0):
             res['code'] = 1005
