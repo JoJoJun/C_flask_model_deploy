@@ -45,7 +45,7 @@ def goDeletePro(pid):
     db.session.delete(pro)
     db.session.commit()
 
-    if Project.query.filter_by(id=pid).first():
+    if db.session.query(Project).filter_by(id=pid).first():
         return False
     else:
         return True
