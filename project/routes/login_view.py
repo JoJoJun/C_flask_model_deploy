@@ -12,7 +12,8 @@ login_manager = flask_login.LoginManager()
 # users = {'foo@bar.tld': {'password': 'secret'}}
 @login_manager.user_loader
 def load_user(account):
-    return User.query.get(account)
+    # return User.query.get(account)
+    return  db.session.query(User).get(account)
 
 
 # @login_manager.request_loader
@@ -34,8 +35,8 @@ def login():
     if request.method == 'GET':
         return render_template('login.html',user=flask_login.current_user)
     email = request.form['account']
-    user_in_db = User.query.filter_by(account=email).first()
-
+    # user_in_db = User.query.filter_by(account=email).first()
+    user_in_db = db.session.query(User).filter_by(account=email).first()
     res = {}
     if not user_in_db:
         msg = '用户不存在'
@@ -77,7 +78,8 @@ def register():
     password2 = request.form['password2']
     name = request.form['name']
     res={}
-    user = User.query.filter_by(account=account).first()
+    # user = User.query.filter_by(account=account).first()
+    user = db.session.query(User).filter_by(account=account).first()
     if user:
         msg = '账户已注册'
         code = 2002
