@@ -19,7 +19,7 @@ def startModel():#模型部署
         else:
             #检查实例是否存在
 
-            if not Record.query.filter_by(model=model_id).first():
+            if not db.session.query(Record).filter_by(model=model_id).first():
                 #res['code'] = 2016
                 #res['msg'] = '实例不存在'
                 create_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -79,7 +79,7 @@ def deleteRecord():#删除实例
     if (len(model_id) == 0):
         res['code'] = 1005
         res['msg'] = '参数数据缺失'
-    elif not Record.query.filter_by(model=model_id).first():
+    elif not db.session.query(Record).filter_by(model=model_id).first():
         res['code'] = 2020
         res['msg'] = '实例不存在'
     elif get_Record_State(model_id)=='1':

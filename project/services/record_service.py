@@ -5,8 +5,8 @@ from datetime import datetime
 # 由model_id返回record
 def get_record_detail_by_model(model_id):
     print(model_id)
-    record = Record.query.filter_by(model=model_id).first()
-
+    # record = Record.query.filter_by(model=model_id).first()
+    record = db.session.query(Record).filter_by(model=model_id).first()
     return record
 
 '''# 由model_id返回record_id
@@ -65,15 +65,18 @@ def countStat(model_id):
 
 #根据模型id找到实例运行状态
 def get_Record_State(id): #0未部署 1运行中 2暂停中
-    record = Record.query.filter_by(model=id).first()
+    # record = Record.query.filter_by(model=id).first()
+    record = db.session.query(Record).filter_by(model=id).first()
     state = record.state
     return state
 
 #根据模型id找到config文件路径
 def get_config_file_path(id):
-    model = Model.query.filter_by(id=id).first()
+    # model = Model.query.filter_by(id=id).first()
+    model = db.session.query(Model).filter_by(id=id).first()
     id = model.file
-    file = File.query.filter_by(id=id).first()
+    # file = File.query.filter_by(id=id).first()
+    file = db.session.query(File).filter_by(id=id).first()
     path = file.path
     return path
 
@@ -90,11 +93,13 @@ def delete_record(id):
 
 # 判断是否已经暂停
 def get_record_state(record_id):
-    record = Record.query.filter_by(id = record_id).first()
+    # record = Record.query.filter_by(id = record_id).first()
+    record = db.session.query(Record).filter_by(id = record_id).first()
     state = record.state
     state = int(state)
     return state
 
 # 由record_id返回record
 def get_record_by_id(record_id):
-    return Record.query.filter_by(id = record_id).first()
+    # return Record.query.filter_by(id = record_id).first()
+    return db.session.query(Record).filter_by(id = record_id).first()
