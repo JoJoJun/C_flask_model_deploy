@@ -57,12 +57,14 @@
 
     <div class="form-group">
         <label class="required" for="model-in-node">输入节点</label>
-        <input type="text" class="form-control" id="model-in-node" placeholder="必填：输入节点" required>
+        <input type="text" class="form-control" id="model-in-node" placeholder="必填：输入节点" maxlength="100" minlength="1"
+               required>
     </div>
 
     <div class="form-group">
         <label class="required" for="model-out-node">输出节点</label>
-        <input type="text" class="form-control" id="model-out-node" placeholder="必填：输出节点" required>
+        <input type="text" class="form-control" id="model-out-node" placeholder="必填：输出节点" maxlength="100" minlength="1"
+               required>
     </div>
 
     <div class="form-group">
@@ -103,7 +105,12 @@
 <script>
     let nav_list = ['首页', '项目', '查看项目', '查看模型', '设置部署参数'];
     let href_list = ['/project/', '/project/', '#', '/model/view/' + location.href.split('/').pop()];
-    let res = {{ res | safe }};
+    let res = {
+    {
+        res | safe
+    }
+    }
+    ;
     $(function () {
         load_nav(nav_list, href_list);
         $('#model-type').val(res['type']);
