@@ -5,7 +5,7 @@ from datetime import datetime
 def getVersion(pid,name):#项目id和模型名称
     print(name)
     print(pid)
-    count = Model.query.filter_by(state=0,name=name,project = pid).count()
+    count = db.session.query(Model).filter_by(state=0,name=name,project = pid).count()
     print(count)
     return count
 
@@ -28,9 +28,11 @@ def getFile(url,name):
 
 #删除模型
 def delete_model(id):
-    record = db.session.query(Record).filter_by(model=id).first()
-    db.session.delete(record)
-    db.session.commit()
+    if db.session.query(Record).filter_by(model=id).first():
+        record = db.session.query(Record).filter_by(model=id).first()
+        db.session.delete(record)
+        db.session.commit()
+
     model = db.session.query(Model).filter_by(id=id).first()
     db.session.delete(model)
     db.session.commit()
@@ -62,20 +64,20 @@ def edit_param(id,memory,input,output):
 
 #根据id找到config文件路径
 def get_config_file_path(id):
-    model = Model.query.filter_by(id=id).first()
+    model = db.session.query(Model).filter_by(id=id).first()
     id = model.file
-    file = File.query.filter_by(id=id).first()
+    file = db.session.query(File).filter_by(id=id).first()
     path = file.path
     return path
 
 #获取模型类别
 def get_model_type(id):
-    model = Model.query.filter_by(id = id).first()
+    model = db.session.query(Model).filter_by(id = id).first()
     type = model.type
     return type
 # 由项目id模型列表
 def model_list(pro_id):
-    list = Model.query.filter_by(state=0, project=pro_id).all()
+    list = db.session.query(Model).filter_by(state=0, project=pro_id).all()
     data = []
     for l in list:
         d = {}
@@ -113,7 +115,7 @@ def model_list(pro_id):
 
 # 由model id得到model信息
 def get_model_detail_by_id(model_id):
-    l = Model.query.filter_by(state=0, id=model_id).first()
+    l = db.session.query(Model).filter_by(state=0, id=model_id).first()
     d = {}
     d['name'] = l.name
     d['type'] = l.type
@@ -133,7 +135,7 @@ def get_model_detail_by_id(model_id):
 
 # 由file id 得到file detail
 def get_file_detail_by_id(file_id):
-    f = File.query.filter_by(id=file_id).first()
+    f = db.session.query(File).filter_by(id=file_id).first()
     data = {}
     data['name']=f.name
     data['path']=f.path
