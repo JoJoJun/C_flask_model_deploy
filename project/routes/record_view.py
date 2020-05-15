@@ -45,7 +45,7 @@ def startModel():#模型部署
                 program_pid_list = data['program_pid_list']
 
                 result = deploy(model_id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
-                #result ='4033'
+                #result = 4033
                 if result == 4031 or result == 4036 or result == 4033 or result == 4034 or result == 4038:
                     res['code'] = 2011
                     res['msg'] = '部署失败'
