@@ -125,7 +125,7 @@ def pauseModel():
     port = record.port
     record_id = record.id
     state = get_record_state(record_id)
-    print(state,type(state))
+    print('state',state,type(state))
     # 判断实例状态
     # 2 暂停中
     if state == 2:
@@ -140,8 +140,10 @@ def pauseModel():
         res['msg'] = msg
         return jsonify(res)
     else:
-        # TODO 调用pause(record_id,port) 返回ans
-        ans = False
+        #  调用pause(record_id,port) 返回ans
+        ans = pause(record_id,port)
+        print("pause:",ans)
+        # ans = False
         if ans:
             res['code'] = 1000
             res['msg'] = '实例暂停成功'
@@ -185,8 +187,9 @@ def restartModel():
         res['msg'] = msg
         return jsonify(res)
     else:
-        # TODO 调用restart(record_id,port) 返回ans
-        ans = False
+        #  调用restart(record_id,port) 返回ans
+        ans = restart(record_id,port)
+        print('restart:',ans)
         if ans:
             res['code'] = 1000
             res['msg'] = '实例恢复成功'
