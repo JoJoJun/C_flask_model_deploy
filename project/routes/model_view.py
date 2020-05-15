@@ -175,7 +175,7 @@ def editParam(model_id):
         print(flag)
         if flag:
             record  = Record.query.filter_by(model = model_id).first()
-            if record.state == '1':
+            if not record.state == '0' :
                 print('cccccccc')
                 res['code'] = 2019
                 res['msg'] = '模型已部署，不能修改参数'
@@ -210,6 +210,7 @@ def editParam(model_id):
             input = ''
             output = ''
             # 编辑config.yml文件
+        int(memory)
         editConfig(input, output, memory, file_path, type)
 
         print(flag)

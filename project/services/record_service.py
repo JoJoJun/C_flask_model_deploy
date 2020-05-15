@@ -46,7 +46,7 @@ def countStat(model_id):
     user_account = flask_login.current_user.account
     #user_account = '123@123.com'
     print(user_account)
-    projects = Project.query.filter_by(user=user_account).all()
+    projects = db.session.query(Project).filter_by(user=user_account).all()
     user_pid_list = []
     for p in projects:
         print(p.id)
@@ -60,7 +60,6 @@ def countStat(model_id):
     data['count'] = count
     data['user_pid_list'] = user_pid_list
     data['program_pid_list'] = program_pid_list
-
 
     return data
 
