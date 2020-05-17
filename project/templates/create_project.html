@@ -32,17 +32,15 @@
 <form style="width: 60%">
     <div class="form-group">
         <label class="required" for="project-name">名称</label>
-        <input type="text" class="form-control" id="project-name" placeholder="必填：项目名称" maxlength="100" minlength="1"
-               required>
+        <input type="text" class="form-control" id="project-name" placeholder="必填：项目名称" required>
     </div>
     <div class="form-group">
         <label class="required" for="project-route">路由</label>
-        <input type="text" class="form-control" id="project-route" placeholder="必填：项目路由" maxlength="255" minlength="1"
-               required>
+        <input type="text" class="form-control" id="project-route" placeholder="必填：项目路由" required>
     </div>
     <div class="form-group">
         <label for="project-description">描述</label>
-        <textarea class="form-control" rows="5" id="project-description" placeholder="项目描述" maxlength="255"></textarea>
+        <textarea class="form-control" rows="5" id="project-description" placeholder="项目描述" onkeydown="if(event.keyCode==13) return false;"></textarea>
     </div>
 
     <div class="operate-button">

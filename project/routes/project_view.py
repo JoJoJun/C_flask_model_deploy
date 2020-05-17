@@ -32,7 +32,8 @@ def addPro():
       msg='用户名下已存在同名项目'
       res['code']=code
       res['msg']=msg
-      return render_template('create_project.html',user = flask_login.current_user,res=res)
+      return jsonify(res)
+      #return render_template('create_project.html',user = flask_login.current_user,res=res)
    else:
       dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
       new_project = Project(name=name,url=url,des=des,user=user_account,create_time=dt,update_time=dt)
@@ -68,7 +69,8 @@ def editPro():
        msg = '用户名下已存在同名项目'
        res['code'] = code
        res['msg'] = msg
-       return render_template('index.html', user=flask_login.current_user, res=res)
+       return jsonify(res)
+       #return render_template('index.html', user=flask_login.current_user, res=res)
    else:
 #       Project.query.filter_by(id=id).update({'name': name,'route':url,'description':des})
        print('ccccccccc')

@@ -43,8 +43,9 @@ def startModel():#模型部署
                 user_pid_list = data['user_pid_list']
                 print(user_pid_list)
                 program_pid_list = data['program_pid_list']
-
+                print(model_id,model_setting_file_path,user_pid_list,program_pid_list) 
                 result = deploy(model_id,model_setting_file_path,user_pid_list,program_pid_list)  #部署系统返回的代码
+                print("result", result)
                 #result = 4033
                 if result == 4031 or result == 4036 or result == 4033 or result == 4034 or result == 4038:
                     res['code'] = 2011
@@ -52,10 +53,11 @@ def startModel():#模型部署
 
                 else:
                     #获得pid port和url和时间，存到数据库
-                    port = result['pid']
+                    port = result['port']
                     url = result['url']
                     key = result['key']
-                    flag = edit_record(model_id,port,url,key)
+                    pid = result['pid']
+                    flag = edit_record(model_id,port,url,key,pid)
                     if flag:
                         res['code'] = 1000
                         res['msg'] = '部署成功'
@@ -86,7 +88,9 @@ def deleteRecord():#删除实例
         res['code'] = 2013
         res['msg'] = '实例在运行状态，不能删除'
     else:
-        code = delete(model_id)
+        record = db.session.query(Record).filter_by(model=model_id).first()
+        pid = record.pid
+        code = delete(pid)
         #code = '4044'
         if code == 4044:
             flag = delete_record(model_id)
@@ -123,6 +127,7 @@ def pauseModel():
         return jsonify(res)
 
     port = record.port
+    pid = record.pid
     record_id = record.id
     state = get_record_state(record_id)
     print('state',state,type(state))
@@ -141,12 +146,14 @@ def pauseModel():
         return jsonify(res)
     else:
         #  调用pause(record_id,port) 返回ans
-        ans = pause(record_id,port)
+        ans = pause(pid,port)
         print("pause:",ans)
         # ans = False
         if ans:
             res['code'] = 1000
             res['msg'] = '实例暂停成功'
+            record.state = 2
+            db.session.commit()
         else:
             res['code'] = 2000
             res['msg'] = '实例暂停失败'
@@ -170,6 +177,7 @@ def restartModel():
         return jsonify(res)
 
     port = record.port
+    pid = record.pid
     record_id = record.id
     state = get_record_state(record_id)
     print(state, type(state))
@@ -188,11 +196,13 @@ def restartModel():
         return jsonify(res)
     else:
         #  调用restart(record_id,port) 返回ans
-        ans = restart(record_id,port)
+        ans = restart(pid,port)
         print('restart:',ans)
         if ans:
             res['code'] = 1000
             res['msg'] = '实例恢复成功'
+            record.state = 1
+            db.session.commit()
         else:
             res['code'] = 2000
             res['msg'] = '实例恢复失败'

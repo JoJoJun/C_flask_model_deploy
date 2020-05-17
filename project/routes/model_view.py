@@ -317,7 +317,7 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
     if type =='H5':#无文件夹
         data = {
             'CURRENT_MODEL_TYPE': 'H5',
-            'H5' : {'model_path': file_path}
+            'H5' : {'model_path': file_path,'mem_limit': 0}
         }
     elif type == 'PB':#无文件夹
         data = {
@@ -364,7 +364,7 @@ def writeConfig(file_dir,file_path,type):  #file_dir是保存到的文件地址(
                 model_graph_file_path = os.path.join(file_path,file)
         data = {
             'CURRENT_MODEL_TYPE': 'TORCH',
-            'TORCH': {'model_path': model_path, 'model_graph_file_path': model_graph_file_path}
+            'TORCH': {'model_path': model_path, 'model_graph_file_path': model_graph_file_path,'mem_limit': 0}
         }
     # 写入到yaml文件
     with open(yaml_path, "w", encoding="utf-8") as f:

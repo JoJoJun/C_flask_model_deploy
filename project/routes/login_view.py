@@ -31,6 +31,8 @@ def load_user(account):
 
 @login_bp.route('/login/', methods=['GET', 'POST'])
 def login():
+    if flask_login.current_user:
+        flask_login.logout_user()
     print("in login!!!!!")
     if request.method == 'GET':
         return render_template('login.html',user=flask_login.current_user)
@@ -70,6 +72,8 @@ def protected():
 
 @login_bp.route('/regist/', methods=['GET', 'POST'])
 def register():
+    if flask_login.current_user:
+        flask_login.logout_user()
     user = {'is_authenticated': False, 'username': ''}
     if request.method == 'GET':
         return render_template('regist.html',user=user)

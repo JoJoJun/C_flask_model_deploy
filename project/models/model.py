@@ -92,6 +92,7 @@ class Record(Base):
     output = Column(String(255), nullable=False)
     key = Column(String(255), nullable=False)
     port = Column(Integer)
+    pid = Column(Integer)
 
     model1 = relationship('Model', primaryjoin='Record.model == Model.id', backref='records')
 

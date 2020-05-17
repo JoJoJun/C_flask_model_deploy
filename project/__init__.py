@@ -1,8 +1,14 @@
 from flask import Flask,Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from project.routes.login_view import login_bp
-
+from . import models, routes, services
 # db = SQLAlchemy()
+#app = Flask(__name__)
+#app.config.from_object('project.config.Config')
+#models.init_app(app)
+#routes.init_app(app)
+
+
 def create_app():
     from . import models, routes, services
     app = Flask(__name__)

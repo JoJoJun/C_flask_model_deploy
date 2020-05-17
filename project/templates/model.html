@@ -80,10 +80,6 @@
                 <td class="value"></td>
             </tr>
             <tr>
-                <td class="field"><strong>文件</strong></td>
-                <td class="value"></td>
-            </tr>
-            <tr>
                 <td class="field"><strong>描述</strong></td>
                 <td class="value"></td>
             </tr>
@@ -147,25 +143,20 @@
         value_list[0].innerText = data['name'];
         value_list[1].innerText = data['type'];
         value_list[2].innerText = data['version'];
-        value_list[3].innerHTML = "<button class=\"download_file\">" +
-            "<i class=\"fa fa-download\" aria-hidden=\"true\"></i>&nbsp;模型文件</button>";
         if (data['description'] == '') {
-            value_list[4].innerHTML = "<span class='nothing'>暂无描述</span>";
+            value_list[3].innerHTML = "<span class='nothing'>暂无描述</span>";
         } else {
-            value_list[4].innerHTML = "<span class='nothing'>" + data['description'] + "</span>";
+            value_list[3].innerHTML = "<span>" + data['description'] + "</span>";
         }
-        $('.download_file').on('click', function () {
-            //
-        })
     }
     function load_deploy_info(data) {
         let value_list = $('#deploy_info table td.value');
         value_list[0].innerHTML = '<img style="width: 90px" src="https://img.alicdn.com/tfs/TB1Ly5oS3HqK1RjSZFPXXcwapXa-238-54.png" class="aliyun-logo-image">';
-        value_list[1].innerHTML = data['mem'] == '' ? "使用默认内存" : data['mem'];
+        value_list[1].innerHTML = data['mem'] == '' ? "使用默认内存" : data['mem']+"MB";
         value_list[2].innerHTML = data['url'] == '' ? "<span class='nothing'>未部署，不可用</span>" :
             data['url'] + "<a class=\"clipboard\">&nbsp;" +
             "<i class=\"fa fa-clipboard\" aria-hidden=\"true\"></i>点击复制</a>";
-        value_list[3].innerHTML = data['key'] == '' ? "<span class='nothing'>未设置，不可用</span>" : data['key'];
+        value_list[3].innerHTML = data['key'] == '' ? "<span class='nothing'>未部署，不可用</span>" : data['key'];
         if (parseInt(data['state']) == 0) {
             value_list[4].innerHTML = '未部署';
             value_list[5].innerHTML = "<button id=\"start\" class=\"btn btn-primary\">启动实例</button>";
