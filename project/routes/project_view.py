@@ -1,4 +1,4 @@
-from project.models.model import User,Project
+from project.models.model import User,Project,Model,Record
 from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 
 from project.services.project_service import list_all_project, check_project_same_name,goDeletePro,edit_Pro,get_detail_byid,check_name
@@ -21,6 +21,8 @@ def project_view():
 def addPro():
    if request.method == 'GET':
       return render_template('create_project.html',user = flask_login.current_user)
+   if not flask_login.current_user.is_authenticated:
+      return redirect(url_for('login.login'))
    print(request.form)
    name = request.form['name']
    url = request.form['url']
@@ -56,6 +58,8 @@ def addPro():
 def editPro():
    if request.method == 'GET':
       return render_template('index.html',user = flask_login.current_user)
+   if not flask_login.current_user.is_authenticated:
+      return redirect(url_for('login.login'))
    id = request.form['id']
    name = request.form['name']
    url = request.form['url']
@@ -85,10 +89,19 @@ def editPro():
 
 @project_bp.route('/deletePro/',methods = ['POST', 'GET'])#删除项目
 def deletePro():
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     pid = request.form.get("id")
     print('test'+ pid)
-    flag = goDeletePro(pid)
     res = {}
+    if db.session.query(Project, Model,Record).filter(
+            Project.id==Model.project,Model.id==Record.model).filter(
+            Project.id == pid,  Record.state == '1').first():
+        res['code'] = 2013
+        res['msg'] = '实例正在运行，无法删除'
+        return jsonify(res)
+    flag = goDeletePro(pid)
+
     if flag:  # 删除成功
         res['code'] = 1000
         res['msg'] = '删除成功'
@@ -103,6 +116,8 @@ def deletePro():
 @project_bp.route('/view/<project_id>',methods = ['POST', 'GET'])
 def viewPro(project_id):
     print(project_id)
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     modellist = model_list(project_id)
     info= get_detail_byid(project_id)
     info['model_list']=modellist

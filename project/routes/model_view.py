@@ -44,6 +44,8 @@ def checkVersion():#检查版本
 def addModel(pid):
     if request.method == 'GET':
         return render_template('create_model.html', user=flask_login.current_user)
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     res = {}
     try:
         name = request.form['name']
@@ -55,10 +57,10 @@ def addModel(pid):
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
         elif not f:
-            res['code'] = 2016
+            res['code'] = 2017
             res['msg'] = '文件丢失'
         elif not allowed_file(f.filename):
-            res['code'] = 2017
+            res['code'] = 2018
             res['msg'] = '文件格式错误'
         else:
             dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -115,6 +117,8 @@ def addModel(pid):
 @model_bp.route('/deleteModel/', methods=['GET', 'POST'])#删除模型
 def deleteModel():
     res = {}
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     try:
         model_id = request.form['model_id']
         print(model_id)
@@ -143,6 +147,8 @@ def deleteModel():
 
 @model_bp.route('/editParam/<model_id>', methods=['GET', 'POST'])#设置参数   是不是直接写文件就可以？
 def editParam(model_id):
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     if request.method == 'GET':
         #查找表单信息并返回
         res = {}
@@ -231,8 +237,8 @@ def editParam(model_id):
 @model_bp.route('/view/<model_id>', methods=['GET', 'POST'])
 def viewModel(model_id):
     print(model_id)
-    if not flask_login.current_user:
-        return render_template('login.html',user=flask_login.current_user)
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     list = get_model_detail_by_id(model_id)
     record = get_record_detail_by_model(model_id)
     info = {}

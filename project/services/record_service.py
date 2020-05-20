@@ -38,27 +38,35 @@ def countStat(model_id):
     project_id = model.project
     print(project_id)
 
-    models = db.session.query(Model).filter_by(project=project_id).all()
+    #models = db.session.query(Model).filter_by(project=project_id).all()
 
     program_pid_list = []
-    for m in models:
-        program_pid_list.append(m.id)
+    #for m in models:
+    #    program_pid_list.append(m.id)
 
     user_account = flask_login.current_user.account
     #user_account = '123@123.com'
     print(user_account)
-    projects = db.session.query(Project).filter_by(user=user_account).all()
+    #projects = db.session.query(Project).filter_by(user=user_account).all()
     user_pid_list = []
-    for p in projects:
-        print(p.id)
-        user_pid_list.append(p.id)
+    #for p in projects:
+    #    print(p.id)
+    #    user_pid_list.append(p.id)
     #计数
-    count  = db.session.query(User, Project,Model,Record).filter(
-            User.account == Project.user,Project.id==Model.project,Model.id==Record.model).filter( User.account == user_account,
-            Record.state == '1').count()
+    r1 = db.session.query(User, Project,Model,Record).filter(User.account == Project.user,Project.id==Model.project,Model.id==Record.model).filter( User.account == user_account,  Record.state != 0).all()
+    count = len(r1)
+    for m in r1:
+        user_pid_list.append(m[3].pid)
+    
+    r2  = db.session.query(Project, Model,Record).filter(Project.id==Model.project,Model.id==Record.model).filter( Project.id == project_id,  Record.state != 0).all()
+    count_1 = len(r2)
+    for p in r2:
+        program_pid_list.append(p[2].pid)
+
     print(count)
 
     data['count'] = count
+    data['count1'] = count_1
     data['user_pid_list'] = user_pid_list
     data['program_pid_list'] = program_pid_list
 

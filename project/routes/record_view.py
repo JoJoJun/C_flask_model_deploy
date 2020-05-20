@@ -1,8 +1,10 @@
-from project.models.model import User,Record
+from project.models.model import User,Record,Model,File
 from flask import Flask, redirect, url_for,render_template,request,Blueprint,jsonify
 from project.models import db
 import flask_login
 import datetime
+import ruamel.yaml
+import  yaml
 from project.services.record_service import get_record_detail_by_model,get_record_state,get_record_by_id
 record_bp = Blueprint('record', __name__, url_prefix='/record')
 from project.services.record_service import countStat,get_Record_State,get_config_file_path,delete_record,edit_record
@@ -11,6 +13,8 @@ from project.deployment.instance_impl import deploy,delete,pause,restart
 @record_bp.route('/startModel/',methods=['GET', 'POST'])
 def startModel():#模型部署
     res = {}
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     try:
         model_id = request.form['model_id']
         if (len(model_id) == 0):
@@ -31,7 +35,8 @@ def startModel():#模型部署
 
             data = countStat(model_id)
             print('hhhhhhhhhhh')
-            if data['count']>=10:
+            print(data)
+            if data['count']>=10 or data['count1']>=5:
                 res['code'] = 2016
                 res['msg'] = '运行实例数达到上限'
             elif get_Record_State(model_id)=='1':
@@ -76,6 +81,8 @@ def startModel():#模型部署
 
 @record_bp.route('/deleteRecord/',methods=['GET', 'POST'])
 def deleteRecord():#删除实例
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     model_id = request.form['model_id']
     res={}
     if (len(model_id) == 0):
@@ -93,6 +100,13 @@ def deleteRecord():#删除实例
         code = delete(pid)
         #code = '4044'
         if code == 4044:
+            #删除配置文件的里的参数信息
+            model = db.session.query(Model).filter_by(id=model_id).first()
+            type = model.type
+            file_id = model.file
+            file = db.session.query(File).filter_by(id=file_id).first()
+            file_path = file.path
+            editConfig('', '', 0, file_path, type)
             flag = delete_record(model_id)
             if flag:
                 res['code'] = 1000
@@ -113,6 +127,8 @@ def deleteRecord():#删除实例
 @record_bp.route('/pauseModel/',methods=['GET','POST'])
 def pauseModel():
     res = {}
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     model_id = request.form['model_id']
     print(model_id)
     record = get_record_detail_by_model(model_id)
@@ -164,6 +180,8 @@ def pauseModel():
 @record_bp.route('/restartModel/',methods=['GET', 'POST'])
 def restartModel():
     res = {}
+    if not flask_login.current_user.is_authenticated:
+        return redirect(url_for('login.login'))
     model_id = request.form['model_id']
     print('model_id',model_id)
     record = get_record_detail_by_model(model_id)
@@ -229,3 +247,21 @@ def addrecord():
     msg = 'true'
     dic['msg']=msg
     return jsonify(dic)
+
+
+def editConfig(input_node_name,output_node_name,mem_limit,file_path,type):  #修改配置文件参数
+    if type =='CPKT' or type == 'PB':#有input output name 参数
+        with open(file_path, encoding="utf-8") as f:
+            content = ruamel.yaml.safe_load(f)
+            content[type]['input_node_name'] = input_node_name
+            content[type]['output_node_name'] = output_node_name
+            content[type]['mem_limit'] = mem_limit
+            with open(file_path, 'w', encoding="utf-8") as nf:
+                yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
+    else:
+        with open(file_path, encoding="utf-8") as f:
+            content = ruamel.yaml.safe_load(f)
+            content[type]['mem_limit'] = mem_limit
+            with open(file_path, 'w', encoding="utf-8") as nf:
+                yaml.dump(content, nf, default_flow_style=False, allow_unicode=True)
+    return 0
