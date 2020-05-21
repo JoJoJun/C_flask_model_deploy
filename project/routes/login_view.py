@@ -73,7 +73,7 @@ def protected():
 
 #验证邮箱合法性
 def validate_email(account):
-    pattern = r'^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$ '
+    pattern = r'^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$'
     if re.match(pattern, account) is not None:
         return True
     else:
@@ -91,8 +91,10 @@ def register():
     password = request.form['password']
     password2 = request.form['password2']
     name = request.form['name']
+    # print(account,name)
     res={}
     ans = validate_email(account)
+    # print(ans)
     if ans is False:
         res['code'] = '2001'
         res['msg'] = '邮箱格式错误'
@@ -105,6 +107,7 @@ def register():
         code = 2002
         res['code'] = code
         res['msg'] = msg
+        print('registered')
     elif password != password2:
         code = 2003
         msg = '确认密码错误，请重新输入'
