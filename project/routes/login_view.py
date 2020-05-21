@@ -96,7 +96,7 @@ def register():
     ans = validate_email(account)
     # print(ans)
     if ans is False:
-        res['code'] = '2001'
+        res['code'] = 2001
         res['msg'] = '邮箱格式错误'
         print('邮箱格式错误')
         return render_template('regist.html',user=user,res=res)
