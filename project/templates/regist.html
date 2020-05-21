@@ -65,6 +65,8 @@
         show_error_msg(4, res['msg']);
     } else if ([2003].indexOf(res['code']) != -1) {		// 确认密码错误
         show_error_msg(3, res['msg']);
+    } else if ([2001].indexOf(res['code']) != -1) {		// 邮箱格式错误
+        show_error_msg(4, res['msg']);
     }
     target.remove();
 </script>
