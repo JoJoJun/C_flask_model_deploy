@@ -4,6 +4,7 @@ from flask import Flask, redirect, url_for,render_template,request,Blueprint,fla
 from project.services.project_service import list_all_project
 from project.models import db
 from datetime import datetime
+import re
 ## 登录的路由和逻辑都在这页了
 login_bp = Blueprint('login', __name__, url_prefix='/account')
 login_manager = flask_login.LoginManager()
@@ -70,6 +71,15 @@ def protected():
     return 'Logged in as: ' + flask_login.current_user.account
 
 
+#验证邮箱合法性
+def validate_email(account):
+    pattern = r'^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$'
+    if re.match(pattern, account) is not None:
+        return True
+    else:
+        return False
+
+
 @login_bp.route('/regist/', methods=['GET', 'POST'])
 def register():
     if flask_login.current_user:
@@ -81,7 +91,15 @@ def register():
     password = request.form['password']
     password2 = request.form['password2']
     name = request.form['name']
+    # print(account,name)
     res={}
+    ans = validate_email(account)
+    # print(ans)
+    if ans is False:
+        res['code'] = 2001
+        res['msg'] = '邮箱格式错误'
+        print('邮箱格式错误')
+        return render_template('regist.html',user=user,res=res)
     # user = User.query.filter_by(account=account).first()
     user = db.session.query(User).filter_by(account=account).first()
     if user:
@@ -89,6 +107,7 @@ def register():
         code = 2002
         res['code'] = code
         res['msg'] = msg
+        print('registered')
     elif password != password2:
         code = 2003
         msg = '确认密码错误，请重新输入'
