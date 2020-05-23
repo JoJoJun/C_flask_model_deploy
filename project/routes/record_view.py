@@ -27,7 +27,7 @@ def startModel():#模型部署
                 #res['code'] = 2016
                 #res['msg'] = '实例不存在'
                 create_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                new_record = Record(model=model_id, state = '0',url='/url',create_time = create_time)
+                new_record = Record(model=model_id, state = '0',url='未部署，不可用',create_time = create_time)
                 db.session.add(new_record)
                 db.session.commit()
 

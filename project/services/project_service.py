@@ -1,4 +1,4 @@
-from project.models.model import Project,User,SQLAlchemy,Model
+from project.models.model import Project,User,SQLAlchemy,Model,Record
 from flask_login import current_user
 from project.models import db
 from datetime import datetime
@@ -41,8 +41,10 @@ def check_project_same_name(name,user_account):
 
 def goDeletePro(pid):
     # Project.query.filter_by和session不能同时使用
-    pro = db.session.query(Project).filter_by(id=pid).first()
-    db.session.delete(pro)
+    list = db.session.query(Project, Model, Record).filter(Project.id == Model.project, Model.id == Record.model).filter(
+        Project.id == pid).all()
+
+    [db.session.delete(p) for p in list]
     db.session.commit()
 
     if db.session.query(Project).filter_by(id=pid).first():

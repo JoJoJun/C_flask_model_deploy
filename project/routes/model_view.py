@@ -1,4 +1,4 @@
-from flask import render_template,request,Blueprint,jsonify,redirect
+from flask import render_template,request,Blueprint,jsonify,redirect,url_for
 import flask_login
 import datetime
 import os
@@ -188,7 +188,7 @@ def editParam(model_id):
                 return jsonify(res)
         else:
             print('xinzen1')
-            new_Record = Record(model=model_id, url='/url', state='0')
+            new_Record = Record(model=model_id, url='未部署，不可用', state='0')
             db.session.add(new_Record)
             db.session.commit()
             flag = True
