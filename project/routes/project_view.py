@@ -118,6 +118,12 @@ def viewPro(project_id):
     print(project_id)
     if not flask_login.current_user.is_authenticated:
         return redirect(url_for('login.login'))
+    l = db.session.query(Project).filter_by(state=0, id=project_id).first()
+    if not l:
+        return redirect(url_for('login.login'))
+    # if l.user != '123@123.com':
+    if  l.user != flask_login.current_user.account:
+        return redirect(url_for('login.login'))
     modellist = model_list(project_id)
     info= get_detail_byid(project_id)
     info['model_list']=modellist
