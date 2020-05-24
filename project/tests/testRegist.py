@@ -4,37 +4,37 @@ import project
 
 app = project.create_app()
 
-class LoginTest(unittest.TestCase):
-    """为login编写测试案例"""
+class RegistTest(unittest.TestCase):
+    """为注册编写测试案例"""
 
     def setUp(self):
         app.testing = True
         self.client = app.test_client()
 
-    def test_login(self):
-        """测试登录"""
-        ret = self.client.post("/account/login/", data={'account':'123@123.com','password':'123456'},follow_redirects=True)
+    def test_regist(self):
+        """测试regist"""
+        ret = self.client.post("/account/regist/", data={'account':'1234@123.com','password':'123456','password2':'123456','name':'1234'},follow_redirects=True)
         # ret  =self.client.login(account='123@123.com',password='123456')
         # ret是视图返回的响应对象，data属性是响应的数据
-        # resp = ret.data
+        resp = ret.data
         # 因为login驶入返回的是json字符串
         # resp = json.loads(resp)
         # print('resp:',resp)
         # 拿到返回值后进行断言测试
-        self.assertIsNotNone(ret.data, 'You were successfully logged in')
+        self.assertIsNotNone(resp, '注册成功')
         # self.assertIn("code", resp)
         # self.assertEqual(resp["code"], 1000)
         # self.assert 'You were logged in' in ret.data
 
-    def test_username_password_wrong(self):
-        """测试用户名密码不正确"""
-        ret = self.client.post("/account/login/", data={'account':'123@123.com','password':'12345678'})
+    def test_account_exist(self):
+        """测试用户名已存在"""
+        ret = self.client.post("/account/regist/", data={'account':'123@123.com','password':'123456','password2':'123456','name':'1234'},follow_redirects=True)
         # ret是视图返回的响应对象，data属性是响应的数据
         resp = ret.data
         # 因为login驶入返回的是json字符串
         # resp = json.loads(resp)
         # 拿到返回值后进行断言测试
-        self.assertIsNotNone(resp, '密码或用户名有误')
+        self.assertIsNotNone(resp, '账户已注册')
         # self.assertIn("code", resp)
         # self.assertEqual(resp["code"], 2017)
 

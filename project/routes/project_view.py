@@ -21,8 +21,8 @@ def project_view():
 def addPro():
    if request.method == 'GET':
       return render_template('create_project.html',user = flask_login.current_user)
-   if not flask_login.current_user.is_authenticated:
-      return redirect(url_for('login.login'))
+   # if not flask_login.current_user.is_authenticated:
+   #    return redirect(url_for('login.login'))
    print(request.form)
    name = request.form['name']
    url = request.form['url']
