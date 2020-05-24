@@ -4,7 +4,7 @@ import project
 
 app = project.create_app()
 
-class RegistTest(unittest.TestCase):
+class ViewModelTest(unittest.TestCase):
     """为查看项目编写测试案例"""
 
     def setUp(self):
