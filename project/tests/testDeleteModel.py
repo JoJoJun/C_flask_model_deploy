@@ -11,9 +11,9 @@ class AddProTest(unittest.TestCase):
         app.testing = True
         self.client = app.test_client()
 
-    def test_wrong_param(self):
+    def test_lack_param(self):
         """测试输入错误的参数"""
-        ret = self.client.post("/model/editParam/57", data={'input':'node1','output':'node2','mem':'true'})
+        ret = self.client.post("/model/deleteModel/", data={'model_id':''})
         # ret是视图返回的响应对象，data属性是响应的数据
         resp = ret.data
         # 因为login驶入返回的是json字符串
@@ -21,11 +21,11 @@ class AddProTest(unittest.TestCase):
         # 拿到返回值后进行断言测试
         self.assertIsNotNone(resp, '我获取到数据')
         self.assertIn("code", resp)
-        self.assertEqual(resp["code"], 2000)
+        self.assertEqual(resp["code"], 1005)
 
-    def test_deployed(self):
-        """测试已经部署的模型"""
-        ret = self.client.post("/model/editParam/81", data={'input':'node1','output':'node2','mem':'true'})
+    def test_cant_delete(self):
+        """测试实例正在运行，不能删除"""
+        ret = self.client.post("/model/deleteModel/", data={'model_id':'61'})
         # ret是视图返回的响应对象，data属性是响应的数据
         resp = ret.data
         # 因为login驶入返回的是json字符串
@@ -33,20 +33,7 @@ class AddProTest(unittest.TestCase):
         # 拿到返回值后进行断言测试
         self.assertIsNotNone(resp, '我获取到数据')
         self.assertIn("code", resp)
-        self.assertEqual(resp["code"], 2019)
-
-    def test_wrong_path(self):
-        """测试错误的路径"""
-        ret = self.client.post("/model/editParam/79", data={'input':'node1','output':'node2','mem':'true'})
-        # ret是视图返回的响应对象，data属性是响应的数据
-        resp = ret.data
-        # 因为login驶入返回的是json字符串
-        resp = json.loads(resp)
-        # 拿到返回值后进行断言测试
-        self.assertIsNotNone(resp, '我获取到数据')
-        self.assertIn("code", resp)
-        self.assertEqual(resp["code"], 2000)
-
+        self.assertEqual(resp["code"], 2013)
 
 
 if __name__ == '__main__':
