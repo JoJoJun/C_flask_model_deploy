@@ -41,11 +41,28 @@ def check_project_same_name(name,user_account):
 
 def goDeletePro(pid):
     # Project.query.filter_by和session不能同时使用
-    list = db.session.query(Project, Model, Record).filter(Project.id == Model.project, Model.id == Record.model).filter(
-        Project.id == pid).all()
 
-    [db.session.delete(p) for p in list]
-    db.session.commit()
+    # 空项目  没有模型
+    models =  db.session.query(Model).filter(Model.project == pid).all()
+    if len(models)==0:
+        print("empty model")
+        list2 = db.session.query(Project).filter(Project.id == pid).all()
+        [db.session.delete(p) for p in list2]
+        db.session.commit()
+    else:
+        model_id_list = [model.id for model in models]
+        [db.session.delete(p) for id in model_id_list for p in db.session.query(Record).filter(Record.model ==id)]
+        [db.session.delete(p) for p in models]
+        list2 = db.session.query(Project).filter(Project.id == pid).all()
+        [db.session.delete(p) for p in list2]
+        db.session.commit()
+    # 模型下没有实例
+
+    # list = db.session.query(Project, Model, Record).filter(Project.id == Model.project, Model.id == Record.model).filter(
+    #     Project.id == pid).all()
+    # print(list)
+    # [db.session.delete(p) for p in list]
+    # db.session.commit()
 
     if db.session.query(Project).filter_by(id=pid).first():
         return False
