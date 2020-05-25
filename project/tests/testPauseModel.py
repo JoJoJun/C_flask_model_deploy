@@ -1,8 +1,6 @@
 import json
 import unittest
-import project
-
-app = project.create_app()
+from project.tests.report_tests import app
 
 class PauseModelTest(unittest.TestCase):
     """为暂停实例编写测试案例"""

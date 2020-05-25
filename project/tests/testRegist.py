@@ -1,8 +1,6 @@
 import json
 import unittest
-import project
-
-app = project.create_app()
+from project.tests.report_tests import app
 
 class RegistTest(unittest.TestCase):
     """为注册编写测试案例"""

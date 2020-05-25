@@ -1,5 +1,7 @@
 import unittest
+import project
 
+app = project.create_app()
 test_dir = './'
 discover = unittest.defaultTestLoader.discover(test_dir, pattern='*test*.py')
 

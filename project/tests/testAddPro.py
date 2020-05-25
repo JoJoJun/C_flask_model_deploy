@@ -1,8 +1,6 @@
 import json
 import unittest
-import project
-
-app = project.create_app()
+from project.tests.report_tests import app
 
 class AddProTest(unittest.TestCase):
     """为新建项目逻辑编写测试案例"""

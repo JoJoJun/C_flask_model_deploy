@@ -1,8 +1,6 @@
 import json
 import unittest
-import project
-
-app = project.create_app()
+from project.tests.report_tests import app
 
 class LoginTest(unittest.TestCase):
     """为login编写测试案例"""
