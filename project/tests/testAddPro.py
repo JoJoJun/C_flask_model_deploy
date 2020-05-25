@@ -13,7 +13,7 @@ class AddProTest(unittest.TestCase):
 
     def test_add_project(self):
         """测试新建一个项目"""
-        ret = self.client.post("/project/addPro/", data={'name':'测试项目3','url':'url','description':'des'})
+        ret = self.client.post("/project/addPro/", data={'name':'测试项目4','url':'url','description':'des'})
         # ret是视图返回的响应对象，data属性是响应的数据
         resp = ret.data
         # 因为login驶入返回的是json字符串
