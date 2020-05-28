@@ -65,3 +65,7 @@
 .loading_context {
     color:#fff;
 }
+
+button {
+    outline: none;
+}
