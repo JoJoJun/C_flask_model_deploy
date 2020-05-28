@@ -21,13 +21,12 @@ def project_view():
 # 新建项目
 @project_bp.route('/addPro/', methods=['GET', 'POST'])
 def addPro():
-   if request.method == 'GET':
-       return render_template('create_project.html',user = flask_login.current_user)
    if not flask_login.current_user.is_authenticated:
        return redirect(url_for('login.login'))
+   if request.method == 'GET':
+       return render_template('create_project.html',user = flask_login.current_user)
    print(request.form)
    name = request.form['name']
-   url = request.form['url']
    des = request.form['description']
    user_account = flask_login.current_user.account
    res ={}
@@ -40,7 +39,7 @@ def addPro():
       #return render_template('create_project.html',user = flask_login.current_user,res=res)
    else:
       dt = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-      new_project = Project(name=name,url=url,des=des,user=user_account,create_time=dt,update_time=dt)
+      new_project = Project(name=name,des=des,user=user_account,create_time=dt,update_time=dt)
       db.session.add(new_project)
       db.session.commit()
       code = 1000
@@ -58,13 +57,12 @@ def addPro():
 
 @project_bp.route('/editPro/', methods=['GET', 'POST'])#编辑项目
 def editPro():
-   if request.method == 'GET':
-      return render_template('index.html',user = flask_login.current_user)
    if not flask_login.current_user.is_authenticated:
       return redirect(url_for('login.login'))
+   if request.method == 'GET':
+      return render_template('index.html',user = flask_login.current_user)
    id = request.form['id']
    name = request.form['name']
-   url = request.form['url']
    des = request.form['description']
    res = {}
    if not check_id(id,0,0):
@@ -85,7 +83,7 @@ def editPro():
    else:
 #       Project.query.filter_by(id=id).update({'name': name,'route':url,'description':des})
        print('ccccccccc')
-       flag = edit_Pro(id,name,url,des)
+       flag = edit_Pro(id,name,des)
        if flag:
             res['code'] = 1000
             res['msg'] = '操作成功'

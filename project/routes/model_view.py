@@ -43,10 +43,10 @@ def checkVersion():#检查版本
 
 @model_bp.route('/addModel/<pid>', methods=['GET', 'POST'])#导入模型
 def addModel(pid):
-    if request.method == 'GET':
-        return render_template('create_model.html', user=flask_login.current_user)
     if not flask_login.current_user.is_authenticated:
         return redirect(url_for('login.login'))
+    if request.method == 'GET':
+        return render_template('create_model.html', user=flask_login.current_user)
     res = {}
     if not check_id(pid, 0, 0):
         code = 3000

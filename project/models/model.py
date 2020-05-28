@@ -57,7 +57,7 @@ class Project(Base):
 
     id = Column(BigInteger, primary_key=True)
     name = Column(String(255), nullable=False)
-    route = Column(String(255), nullable=False)
+    route = Column(String(255))
     description = Column(String(255))
     user = Column(ForeignKey('user.account', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     create_time = Column(DateTime)

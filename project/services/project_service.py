@@ -68,12 +68,11 @@ def goDeletePro(pid):
         return False
     else:
         return True
-def edit_Pro(id,name,url,des):
+def edit_Pro(id,name,des):
     flag  = False
     pro = db.session.query(Project).filter_by(id=id).first()
     print(id + ' ' + pro.name + ' ' + pro.route + ' ' + pro.description)
     pro.name = name
-    pro.route = url
     pro.description = des
     print(id + ' ' + pro.name + ' ' + pro.route + ' ' + pro.description)
     db.session.commit()
