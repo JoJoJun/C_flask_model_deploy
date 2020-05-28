@@ -87,6 +87,7 @@ def editPro():
             res['msg'] = '操作失败'
        return jsonify(res)
 
+
 @project_bp.route('/deletePro/',methods = ['POST', 'GET'])#删除项目
 def deletePro():
     if not flask_login.current_user.is_authenticated:

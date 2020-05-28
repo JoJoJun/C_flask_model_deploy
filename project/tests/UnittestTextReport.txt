@@ -1,0 +1,73 @@
+test_lack_file (testAddModel.AddProTest)
+测试输入不全的文件 ... ok
+test_lack_param (testAddModel.AddProTest)
+测试输入不全的参数 ... ok
+test_wrong_param (testAddModel.AddProTest)
+测试输入错误的参数 ... ok
+test_add_project (testAddPro.AddProTest)
+测试新建一个项目 ... ok
+test_same_name (testAddPro.AddProTest)
+测试项目名重复 ... ok
+test_cant_delete (testDeleteModel.AddProTest)
+测试实例正在运行，不能删除 ... ok
+test_lack_param (testDeleteModel.AddProTest)
+测试输入错误的参数 ... ok
+test_delete_empty_project (testDeletePro.DeleteProTest)
+测试删除一个空项目 ... ok
+test_delete_model_project (testDeletePro.DeleteProTest)
+测试删除有模型的项目 ... ok
+test_lack_param (testDeleteRecord.AddProTest)
+测试参数缺失 ... ok
+test_no_record (testDeleteRecord.AddProTest)
+测试实例不存在 ... ok
+test_started (testDeleteRecord.AddProTest)
+测试实例正在运行 ... ok
+test_wrong_envir (testDeleteRecord.AddProTest)
+测试错误的运行环境 ... ok
+test_deployed (testEditParam.AddProTest)
+测试已经部署的模型 ... ok
+test_wrong_param (testEditParam.AddProTest)
+测试输入错误的参数 ... ok
+test_wrong_path (testEditParam.AddProTest)
+测试错误的路径 ... ok
+test_edit_project (testEditPro.EditProTest)
+测试编辑一个项目 ... ok
+test_same_name (testEditPro.EditProTest)
+测试项目名重复 ... ok
+test_login (testLogin.LoginTest)
+测试登录 ... ok
+test_username_password_wrong (testLogin.LoginTest)
+测试用户名密码不正确 ... ok
+test_pause_model (testPauseModel.PauseModelTest)
+测试暂停 ... ok
+test_record_0 (testPauseModel.PauseModelTest)
+测试未部署的状态 ... ok
+test_record_paused (testPauseModel.PauseModelTest)
+测试不能暂停的状态 ... ok
+test_account_exist (testRegist.RegistTest)
+测试用户名已存在 ... ok
+test_regist (testRegist.RegistTest)
+测试regist ... ok
+test_record_0 (testRestartModel.RestartModelTest)
+测试未部署的状态 ... ok
+test_record_running (testRestartModel.RestartModelTest)
+测试不能恢复的状态 ... ok
+test_restart_model (testRestartModel.RestartModelTest)
+测试恢复 ... ok
+test_lack_param (testStartModel.AddProTest)
+测试参数缺失 ... ok
+test_started (testStartModel.AddProTest)
+测试实例正在运行 ... ok
+test_wrong_envir (testStartModel.AddProTest)
+测试错误的运行环境 ... ok
+test_wrong_param (testStartModel.AddProTest)
+测试错误的参数 ... ok
+test_id_valid (testViewPro.ViewModelTest)
+测试id不合法 ... ok
+test_view (testViewPro.ViewModelTest)
+测试view ... ok
+
+----------------------------------------------------------------------
+Ran 34 tests in 4.690s
+
+OK
