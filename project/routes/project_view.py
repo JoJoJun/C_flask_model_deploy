@@ -148,7 +148,7 @@ def check_id(project_id,model_id,record_id):
     flag = False
     account = flask_login.current_user.account
     if project_id != 0:#验证pid
-        if db.session.query(Project).filter_by(state=0, id=project_id, account=account).first():  #该pid属于该用户
+        if db.session.query(Project).filter_by(state=0, id=project_id, user=account).first():  #该pid属于该用户
             flag = True
     if model_id != 0:#验证mid
         if db.session.query(User,Project, Model).filter(

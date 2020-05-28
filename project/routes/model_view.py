@@ -222,6 +222,11 @@ def editParam(model_id):
             mem = request.form['mem']
             if mem == 'true':
                 memory = request.form['memory']
+
+                if int(memory) > 1024:
+                    res['code'] = 2000
+                    res['msg'] = '服务器错误，请检查参数'
+                    return jsonify(res)
             else:
                 memory = 0
             # 编辑config.yml文件
@@ -229,6 +234,10 @@ def editParam(model_id):
             mem = request.form['mem']
             if mem == 'true':
                 memory = request.form['memory']
+                if int(memory) > 1024:
+                    res['code'] = 2000
+                    res['msg'] = '服务器错误，请检查参数'
+                    return jsonify(res)
             else:
                 memory = 0
             input = ''
