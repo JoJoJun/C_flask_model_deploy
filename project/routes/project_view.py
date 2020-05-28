@@ -142,6 +142,7 @@ def viewPro(project_id):
     return render_template('project.html',user=flask_login.current_user,project_info=info)
 
 
+
 def check_id(project_id,model_id,record_id):
     flag = False
     account = flask_login.current_user.account
