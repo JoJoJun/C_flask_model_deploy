@@ -12,6 +12,8 @@ project_bp = Blueprint('project', __name__, url_prefix='/project')
 # 登录后的全部项目列表页
 @project_bp.route('/', methods=['GET', 'POST'])
 def project_view():
+   if not flask_login.current_user.is_authenticated:
+       return redirect(url_for('login.login'))
    list = list_all_project()
    return render_template('index.html', user=flask_login.current_user, data=list)
 
