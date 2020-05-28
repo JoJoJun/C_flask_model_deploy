@@ -108,11 +108,13 @@ def register():
         res['code'] = code
         res['msg'] = msg
         print('registered')
+        return render_template('regist.html', user=None, res=res)
     elif password != password2:
         code = 2003
         msg = '确认密码错误，请重新输入'
         res['code'] = code
         res['msg'] = msg
+        return render_template('regist.html', user=None, res=res)
     else:
         dt = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         new_user = User(account=account,password=password,name=name,create_time = dt,update_time = dt)
@@ -125,7 +127,7 @@ def register():
         return redirect(url_for('login.login'))
         # print(res)
         # return render_template('login.html',user = user,res = res)
-    return render_template('regist.html',user=user,res=res)
+    # return render_template('regist.html',user=user,res=res)
 
 
 
