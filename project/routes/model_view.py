@@ -186,6 +186,7 @@ def editParam(model_id):
             res['input'] = ''
             res['output'] = ''
         res['type'] = model.type
+        res['project_id'] = model.project
         return render_template('model_parm.html', user=flask_login.current_user,res = res)
     res = {}
     if not check_id(0, model_id, 0):
