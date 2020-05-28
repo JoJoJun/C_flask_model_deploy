@@ -81,7 +81,7 @@
                 </label>
             </div>
             <div class="input-group">
-                <input type="text" class="form-control" id="model-mem" placeholder="请填写预留内存大小"
+                <input type="text" class="form-control" id="model-mem" placeholder="请填写预留内存大小,不超过1024MB"
                        oninput="value=value.replace(/[^\d]/g,'')" disabled required>
                 <span class="input-group-addon">MB</span>
             </div>
@@ -101,9 +101,9 @@
     </div>
 </div>
 <script>
-    let nav_list = ['首页', '项目', '查看项目', '查看模型', '设置部署参数'];
-    let href_list = ['/project/', '/project/', '#', '/model/view/' + location.href.split('/').pop()];
-    let res = {{ res | safe }};
+    let res = {{ res|safe }};
+	let nav_list = ['首页', '项目', '查看项目', '查看模型', '设置部署参数'];
+    let href_list = ['/project/', '/project/', '/project/view/'+res['project_id'], '/model/view/'+location.href.split('/').pop()];
     $(function () {
         load_nav(nav_list, href_list);
         $('#model-type').val(res['type']);
