@@ -69,3 +69,6 @@
 button {
     outline: none;
 }
+textarea {
+    resize: none;
+}
