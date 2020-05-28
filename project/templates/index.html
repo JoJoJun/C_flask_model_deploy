@@ -2,6 +2,7 @@
 
 {% block import %}
 <link rel="stylesheet" href="/static/bootstrap-table/dist/bootstrap-table.min.css">
+<script type = "text/javascript" src="{{ url_for('static', filename = 'js/vue.js') }}"></script>
 <script type = "text/javascript" src="{{ url_for('static', filename = 'bootstrap-table/dist/bootstrap-table.js') }}"></script>
 <script type = "text/javascript" src="{{ url_for('static', filename = 'bootstrap-table/dist/locale/bootstrap-table-zh-CN.min.js') }}"></script>
 <style>
@@ -11,7 +12,7 @@
         float: right;
     }
     .search-input {
-        border-radius: 4px !important;
+        border-radius: 4px!important;
     }
     .form-horizontal .control-label {
         padding-top: 0;
@@ -57,12 +58,10 @@
     <span class="badge">{{ data|length }}</span>
 </div>
 <div id="toolbar">
-    <a href="/project/addPro">
-        <button class="btn btn-default" id="create_project">
-            <i class="fa fa-plus-circle" aria-hidden="true"></i>
-            &nbsp;新建项目
-        </button>
-    </a>
+    <a href="/project/addPro"><button class="btn btn-default" id="create_project">
+        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+        &nbsp;新建项目
+    </button></a>
 </div>
 <table id="project-list" class="table table-striped table-bordered table-hover" style="display: table;"></table>
 <!-- 转圈动画 -->
@@ -93,20 +92,13 @@
                     <div class="form-group">
                         <label class="required col-sm-2 control-label" for="project-name">名称:</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" id="project-name" placeholder="必填：项目名称" >
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="required col-sm-2 control-label" for="project-route">路由:</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" id="project-route" placeholder="必填：项目路由" >
+                            <input type="text" class="form-control" id="project-name" placeholder="必填：项目名称" maxlength="100" minlength="1">
                         </div>
                     </div>
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="project-description">描述:</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" rows="5" id="project-description" style="resize: none"
-                                      placeholder="项目描述"></textarea>
+                            <textarea class="form-control" rows="5" id="project-description" style="resize: none" placeholder="项目描述" maxlength="255"></textarea>
                         </div>
                     </div>
                 </form>
@@ -151,17 +143,17 @@
         load_nav(nav_list, href_list);
         load_table(projects_data);
     });
-    $("#project-name, #project-route").blur(function () {
+    $("#project-name").blur(function(){
         // 先清空所有的span元素
         clear_error_feedback(this, 'div.col-sm-10');
         // 校验
         let value = $(this).val().trim();
-        if (value == "") {
+        if(value == ""){
             error_msg = "不可为空";
             set_error_feedback(this, 'div.col-sm-10', error_msg);
         }
         // 按钮禁用/启用
-        if ($('#project-name').val().trim() == '' || $('#project-route').val().trim() == '')
+        if ($('#project-name').val().trim() == '')
             $('#save-edit').attr('disabled', true);
         else
             $('#save-edit').attr('disabled', false);
@@ -169,25 +161,25 @@
     $('#save-edit').click(function () {
         let pId = document.getElementById('project-id').value;
         let pName = document.getElementById('project-name').value;
-        let pRoute = document.getElementById('project-route').value;
         let pDesc = document.getElementById('project-description').value;
-        let upload_data = {'id': pId, 'name': pName, 'url': pRoute, 'description': pDesc};
+        let upload_data = {'id': pId, 'name': pName, 'description': pDesc};
         $.ajax({
             url: "/project/editPro/",
             type: "POST",
             data: upload_data,
             dataType: 'json',
             timeout: 10000,
-            beforeSend: function () {
+            beforeSend:function () {
                 $('#load').show();
                 $('#save-edit').attr('disabled', true);
             },
-            success: function (res) {
+            success:function(res){
                 $('#load').hide();
                 $('#save-edit').attr('disabled', false);
-                if (res['code'] == 1000) {
+                if(res['code'] == 1000){
                     location.reload();
-                } else if ([2004].indexOf(res['code']) != -1) {     // 用户名下已存在同名项目
+                }
+                else if([2004].indexOf(res['code']) != -1){     // 用户名下已存在同名项目
                     let target_input = document.getElementById('project-name');
                     clear_error_feedback(target_input, 'div.col-sm-10');
                     set_error_feedback(target_input, 'div.col-sm-10', res['msg']);
@@ -207,28 +199,31 @@
             type: "POST",
             data: {'id': current_project_id},
             dataType: 'json',
+            async: true,
             timeout: 10000,
-            beforeSend: function () {
+            beforeSend: function (x) {
+                // console.log(x.__proto__);
                 $('#load2').show();
                 $('#delete-yes').attr('disabled', true);
             },
-            success: function (res) {
+            success: function(res){
+                console.log('success');
                 $('#load2').hide();
                 $('#delete-yes').attr('disabled', false);
-                if (res['code'] == 1000) {
+                if(res['code'] == 1000){
                     $('#delete-no').click();
                     let obj = current_delete_btn.closest('tr');
-                    obj.animate({opacity: 0.0}, 800, 'swing', function () {
+                    obj.animate({opacity:0.0}, 800, 'swing', function(){
                         $('#project-list').bootstrapTable('remove', {field: 'operation', values: current_project_id});
                     });
-                    for (let i = 0; i < projects_data.length; i++) {
-                        if (projects_data[i]['id'] == current_project_id) {
+                    for(let i = 0; i < projects_data.length; i++){
+                        if(projects_data[i]['id'] == current_project_id){
                             projects_data.splice(i, 1);
                             break;
                         }
                     }
                     $('span[class="badge"]').html(projects_data.length);
-                } else {
+                }else{
                     alert(res['msg']);
                 }
             },
@@ -244,14 +239,12 @@
         for(let i = 0; i < data.length; i++){
             tableData[i] = new Object();
             tableData[i].name = data[i].name;
-            tableData[i].url = data[i].url;
             tableData[i].create_time = data[i].create_time;
             tableData[i].update_time = data[i].update_time;
             tableData[i].operation = data[i].id;
         }
         let tableColumns = [
             {field: 'name', title: '名称', sortable: true},
-            {field: 'url', title: '路由', sortable: true},
             {field: 'create_time', title: '创建时间', sortable: true},
             {field: 'update_time', title: '更新时间', sortable: true},
             {field: 'operation', title: '操作',
@@ -303,15 +296,14 @@
         $(document).on('click', 'button[data-target="#edit-modal"]', function () {
             let id = this.id.split('-')[1];
             let current_pro;
-            for (let pro of projects_data) {
-                if (pro['id'] == id) {
+            for(let pro of projects_data){
+                if(pro['id'] == id){
                     current_pro = pro;
                     break;
                 }
             }
             document.getElementById('project-id').value = current_pro['id'];
             document.getElementById('project-name').value = current_pro['name'];
-            document.getElementById('project-route').value = current_pro['url'];
             document.getElementById('project-description').value = current_pro['description'];
             $('.modal .has-error span').remove();
             $('.modal .has-error.has-feedback').removeClass('has-error has-feedback');

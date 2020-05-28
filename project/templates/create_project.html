@@ -32,15 +32,11 @@
 <form style="width: 60%">
     <div class="form-group">
         <label class="required" for="project-name">名称</label>
-        <input type="text" class="form-control" id="project-name" placeholder="必填：项目名称" required>
-    </div>
-    <div class="form-group">
-        <label class="required" for="project-route">路由</label>
-        <input type="text" class="form-control" id="project-route" placeholder="必填：项目路由" required>
+        <input type="text" class="form-control" id="project-name" placeholder="必填：项目名称" maxlength="100" minlength="1" required>
     </div>
     <div class="form-group">
         <label for="project-description">描述</label>
-        <textarea class="form-control" rows="5" id="project-description" placeholder="项目描述" onkeydown="if(event.keyCode==13) return false;"></textarea>
+        <textarea class="form-control" rows="5" id="project-description" placeholder="项目描述" maxlength="255" onkeydown="if(event.keyCode==13)return false;"></textarea>
     </div>
 
     <div class="operate-button">
@@ -62,7 +58,7 @@
         load_nav(nav_list, href_list);
     });
     /** 文本框.blur **/
-    $("#project-name, #project-route").blur(function(){
+    $("#project-name").blur(function(){
         // 先清空所有的span元素
         clear_error_feedback(this, 'div.form-group');
         // 校验
@@ -78,26 +74,26 @@
     });
     $('.create').click(function () {
         let pName = document.getElementById('project-name').value;
-        let pRoute = document.getElementById('project-route').value;
         let pDesc = document.getElementById('project-description').value;
-        let upload_data = {'name': pName, 'url': pRoute, 'description': pDesc};
+        let upload_data = {'name': pName, 'description': pDesc};
         $.ajax({
             type: "POST",
             data: upload_data,
             dataType: 'json',
             timeout: 10000,
-            beforeSend: function () {
+            beforeSend:function () {
                 $('#loading').show();
             },
-            success: function (res) {
+            success:function(res){
                 $('#loading').hide();
                 console.log(res);
-                if (res['code'] == 1000) {
+                if(res['code'] == 1000) {
                     // alert('创建成功');
-                    window.location = '/project/view/' + res['id'];
-                } else {
+                    window.location = '/project/view/'+res['id'];
+                }
+                else {
                     // alert('创建失败');
-                    if ([2004].indexOf(res['code']) != -1) {
+                    if([2004].indexOf(res['code']) != -1){
                         let target_input = document.getElementById('project-name');
                         clear_error_feedback(target_input, 'div.form-group');
                         set_error_feedback(target_input, 'div.form-group', res['msg']);
@@ -113,7 +109,7 @@
 
     /** 确定按钮 disable or not **/
     function button_disable_or_not() {
-        if ($('#project-name').val().trim() == '' || $('#project-route').val().trim() == '')
+        if ($('#project-name').val().trim() == '')
             $('.create').attr('disabled', true);
         else
             $('.create').attr('disabled', false);
