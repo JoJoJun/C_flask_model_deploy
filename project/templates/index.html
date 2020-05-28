@@ -211,7 +211,8 @@
                 $('#load2').hide();
                 $('#delete-yes').attr('disabled', false);
                 if(res['code'] == 1000){
-                    $('#delete-no').click();
+                    location.reload();
+                    /*$('#delete-no').click();
                     let obj = current_delete_btn.closest('tr');
                     obj.animate({opacity:0.0}, 800, 'swing', function(){
                         $('#project-list').bootstrapTable('remove', {field: 'operation', values: current_project_id});
@@ -222,7 +223,7 @@
                             break;
                         }
                     }
-                    $('span[class="badge"]').html(projects_data.length);
+                    $('span[class="badge"]').html(projects_data.length);*/
                 }else{
                     alert(res['msg']);
                 }
