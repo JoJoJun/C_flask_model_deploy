@@ -9,6 +9,7 @@ from project.services.record_service import get_record_detail_by_model,get_recor
 record_bp = Blueprint('record', __name__, url_prefix='/record')
 from project.services.record_service import countStat,get_Record_State,get_config_file_path,delete_record,edit_record
 from project.deployment.instance_impl import deploy,delete,pause,restart
+from project.routes.project_view import check_id
 
 @record_bp.route('/startModel/',methods=['GET', 'POST'])
 def startModel():#模型部署
@@ -21,6 +22,12 @@ def startModel():#模型部署
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
+            if not check_id(0, model_id, 0):
+                code = 3000
+                msg = '用户身份不匹配，请重试'
+                res['code'] = code
+                res['msg'] = msg
+                return jsonify(res)
             #检查实例是否存在
 
             if not db.session.query(Record).filter_by(model=model_id).first():
@@ -88,6 +95,12 @@ def deleteRecord():#删除实例
     if (len(model_id) == 0):
         res['code'] = 1005
         res['msg'] = '参数数据缺失'
+    elif not check_id(0, model_id, 0):
+        code = 3000
+        msg = '用户身份不匹配，请重试'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
     elif not db.session.query(Record).filter_by(model=model_id).first():
         res['code'] = 2020
         res['msg'] = '实例不存在'
@@ -131,6 +144,12 @@ def pauseModel():
         return redirect(url_for('login.login'))
     model_id = request.form['model_id']
     print(model_id)
+    if not check_id(0, model_id, 0):
+        code = 3000
+        msg = '用户身份不匹配，请重试'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
     record = get_record_detail_by_model(model_id)
 
     # record = get_record_by_id(record_id)
@@ -184,6 +203,12 @@ def restartModel():
         return redirect(url_for('login.login'))
     model_id = request.form['model_id']
     print('model_id',model_id)
+    if not check_id(0, model_id, 0):
+        code = 3000
+        msg = '用户身份不匹配，请重试'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
     record = get_record_detail_by_model(model_id)
     # record = get_record_by_id(record_id)
     # 判断查询是否成功

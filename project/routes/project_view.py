@@ -20,9 +20,9 @@ def project_view():
 @project_bp.route('/addPro/', methods=['GET', 'POST'])
 def addPro():
    if request.method == 'GET':
-      return render_template('create_project.html',user = flask_login.current_user)
-   # if not flask_login.current_user.is_authenticated:
-   #    return redirect(url_for('login.login'))
+       return render_template('create_project.html',user = flask_login.current_user)
+   if not flask_login.current_user.is_authenticated:
+       return redirect(url_for('login.login'))
    print(request.form)
    name = request.form['name']
    url = request.form['url']
@@ -64,8 +64,13 @@ def editPro():
    name = request.form['name']
    url = request.form['url']
    des = request.form['description']
-
    res = {}
+   if not check_id(id,0,0):
+       code = 3000
+       msg = '用户身份不匹配，请重试'
+       res['code'] = code
+       res['msg'] = msg
+       return jsonify(res)
    user_account = flask_login.current_user.account
 #   user_account = '123@123.com'
    if check_name(name, user_account,id):
@@ -95,6 +100,12 @@ def deletePro():
     pid = request.form.get("id")
     print('test'+ pid)
     res = {}
+    if not check_id(pid, 0, 0):
+        code = 3000
+        msg = '用户身份不匹配，请重试'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
     if db.session.query(Project, Model,Record).filter(
             Project.id==Model.project,Model.id==Record.model).filter(
             Project.id == pid,  Record.state == '1').first():
@@ -131,3 +142,20 @@ def viewPro(project_id):
     return render_template('project.html',user=flask_login.current_user,project_info=info)
 
 
+def check_id(project_id,model_id,record_id):
+    flag = False
+    account = flask_login.current_user.account
+    if project_id != 0:#验证pid
+        if db.session.query(Project).filter_by(state=0, id=project_id, account=account).first():  #该pid属于该用户
+            flag = True
+    if model_id != 0:#验证mid
+        if db.session.query(User,Project, Model).filter(
+                User.account == Project.user,Project.id==Model.project).filter(
+                User.account == account,Model.id == model_id).first():
+            flag = True    #该mid属于该用户
+    if record_id != 0:#验证rid
+        if db.session.query(User,Project, Model,Record).filter(
+                User.account == Project.user,Project.id==Model.project,Model.id == Record.model).filter(
+                User.account == account,Record.id == record_id).first():
+            flag = True  #该rid属于该用户
+    return flag

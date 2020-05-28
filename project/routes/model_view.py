@@ -8,6 +8,7 @@ import zipfile
 from project.models.model import Model,Record
 from project.services.model_service import getVersion,checkAdd,getFile,delete_model,findRecord,edit_param,get_model_detail_by_id,get_model_type,get_config_file_path
 from project.services.record_service import get_record_detail_by_model
+from project.routes.project_view import check_id
 from project.models import db
 model_bp = Blueprint('model', __name__, url_prefix='/model')
 # 对项目模型的各种操作
@@ -47,6 +48,12 @@ def addModel(pid):
     if not flask_login.current_user.is_authenticated:
         return redirect(url_for('login.login'))
     res = {}
+    if not check_id(pid, 0, 0):
+        code = 3000
+        msg = '用户身份不匹配，请重试'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
     try:
         name = request.form['name']
         type = request.form['type']
@@ -126,6 +133,12 @@ def deleteModel():
             res['code'] = 1005
             res['msg'] = '参数数据缺失'
         else:
+            if not check_id(0, model_id, 0):
+                code = 3000
+                msg = '用户身份不匹配，请重试'
+                res['code'] = code
+                res['msg'] = msg
+                return jsonify(res)
             if db.session.query(Record).filter_by(model=model_id).first() and db.session.query(Record).filter_by(model=model_id).first().state == '1':
                 print('cccccccc')
                 res['code'] = 2013
@@ -167,7 +180,6 @@ def editParam(model_id):
                 res['output'] = ''
             else:
                 res['output'] = record.output
-
             print(res)
         else:
             res['memory'] = ''
@@ -176,6 +188,12 @@ def editParam(model_id):
         res['type'] = model.type
         return render_template('model_parm.html', user=flask_login.current_user,res = res)
     res = {}
+    if not check_id(0, model_id, 0):
+        code = 3000
+        msg = '用户身份不匹配，请重试'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
     try:
         flag = findRecord(model_id)
         print(flag)
@@ -239,6 +257,13 @@ def viewModel(model_id):
     print(model_id)
     if not flask_login.current_user.is_authenticated:
         return redirect(url_for('login.login'))
+    res = {}
+    if not check_id(0, model_id, 0):
+        code = 3000
+        msg = '用户身份不匹配，请重试'
+        res['code'] = code
+        res['msg'] = msg
+        return jsonify(res)
     list = get_model_detail_by_id(model_id)
     record = get_record_detail_by_model(model_id)
     info = {}
